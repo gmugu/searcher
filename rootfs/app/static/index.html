@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+        content="initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no, width=device-width, viewport-fit=cover">
+    <title>Seracher</title>
+
+    <script crossorigin="anonymous" src="./lib/vue.global.min.js"></script>
+    <script crossorigin="anonymous" src="./lib/vue-router.global.min.js"></script>
+
+    <link crossorigin="anonymous" href="./lib/notyf.min.css" rel="stylesheet">
+    <script crossorigin="anonymous" src="./lib/notyf.min.js"></script>
+
+    <link href="./lib/common.css" type="text/css" rel="stylesheet">
+    <link href="./lib/style.css" type="text/css" rel="stylesheet">
+    <style>
+        button {
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 1rem;
+            text-align: center;
+            text-decoration: none;
+            margin: 0.2rem;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            color: #fff;
+        }
+
+        /* 默认状态 */
+        button {
+            background-color: #007bff;
+        }
+
+        /* 鼠标悬停状态
+        .button_selected {
+            background-color: #b633af;
+        } */
+        /* 按下状态 */
+        button:active {
+            background-color: #003080;
+        }
+
+        /* 禁用状态 */
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 选中状态 */
+        .button_selected {
+            background-color: #003080;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <router-view></router-view>
+    </div>
+</body>
+<script>
+
+    const notyf = new Notyf({
+        position: { x: "center", y: "top" },
+        types: [
+            {
+                type: "success",
+                background: "#99c959",
+                duration: 2000,
+            },
+            {
+                type: "warning",
+                background: "#f8b26a",
+                duration: 3000
+            },
+            {
+                type: "error",
+                background: "#e15b64",
+                duration: 3000,
+            }
+        ]
+    });
+    function letterAvatar(name, size, color) {
+        name = name || ''
+        size = size || 60
+        var colours = [
+            "#eccc68", "#ff7f50", "#ff6b81", "#ffa502", "#747d8c", "#ff4757", "#7bed9f", "#70a1ff", "#8e44ad", "#2ed573",
+            "#1e90ff", "#a4b0be", "#ff6348", "#ff9ff3", "#f368e0", "#48dbfb", "#badc58", "#6ab04c", "#0fbcf9", "#f9ca24"
+        ],
+            nameSplit = String(name).split(' '),
+            initials, charIndex, colourIndex, canvas, context, dataURI
+        if (nameSplit.length == 1) {
+            initials = nameSplit[0] ? nameSplit[0].charAt(0) : '?'
+        } else {
+            initials = nameSplit[0].charAt(0) + nameSplit[1].charAt(0)
+        }
+        if (window.devicePixelRatio) {
+            size = (size * window.devicePixelRatio)
+        }
+
+
+        charIndex = (initials == '?' ? 72 : initials.charCodeAt(0)) - 64
+        colourIndex = charIndex % 20
+        canvas = document.createElement('canvas')
+        canvas.width = size
+        canvas.height = size
+        context = canvas.getContext("2d")
+
+        //偏移
+        var offset = 0
+        if (/^[\u4E00-\u9FA5]+$/.test(initials)) { //如果是中文
+            offset = 1
+        }
+        context.fillStyle = color ? color : colours[colourIndex - 1]
+        context.fillRect(0, 0, canvas.width, canvas.height)
+        context.font = Math.round(canvas.width / 2) + "px Arial"
+        context.textAlign = "center"
+        context.fillStyle = "#FFF"
+        context.fillText(initials, (size / 2) + offset, (size / 1.5) + offset)
+        dataURI = canvas.toDataURL()
+        canvas = null
+        return dataURI
+    }
+    const api = {
+        async apiSearch_139(keyword, page = 1) {
+            let response = await fetch(`/api/search_139`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    keyword,
+                    page,
+                })
+            });
+            let json = await response.json();
+            // console.log(json)
+            if (json.status !== 'success') {
+                throw json.msg;
+            }
+            return json.result
+        },
+        async apiSearch_189(keyword, page = 1) {
+            let response = await fetch(`/api/search_189`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    keyword,
+                    page,
+                })
+            });
+            let json = await response.json();
+            // console.log(json)
+            if (json.status !== 'success') {
+                throw json.msg;
+            }
+            return json.result
+        },
+        async apiQueryTopicList_139(page = 1) {
+            let response = await fetch(`/api/queryTopicList_139`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    page,
+                })
+            });
+            let json = await response.json();
+            // console.log(json)
+            if (json.status !== 'success') {
+                throw json.msg;
+            }
+            return json.result
+        },
+        async apiQueryTopicList_189(page = 1) {
+            let response = await fetch(`/api/queryTopicList_189`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    page,
+                })
+            });
+            let json = await response.json();
+            // console.log(json)
+            if (json.status !== 'success') {
+                throw json.msg;
+            }
+            return json.result
+        },
+        async apiQueryTopicContent_139(topicId) {
+            let response = await fetch(`/api/queryTopicContent_139`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    topicId,
+                })
+            });
+            let json = await response.json();
+            // console.log(json)
+            if (json.status !== 'success') {
+                throw json.msg;
+            }
+            return json.result;
+        },
+        async apiQueryTopicContent_189(topicId) {
+            let response = await fetch(`/api/queryTopicContent_189`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    topicId,
+                })
+            });
+            let json = await response.json();
+            // console.log(json)
+            if (json.status !== 'success') {
+                throw json.msg;
+            }
+            return json.result;
+        },
+        async apiAddComment_189(topicId, content) {
+            let response = await fetch(`/api/addComment_189`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    topicId,
+                    content,
+                })
+            });
+            let json = await response.json();
+            // console.log(json)
+            if (json.status !== 'success') {
+                throw json.msg;
+            }
+            return json.result;
+        },
+    }
+
+    const HOST_TYPE = {
+        _139: '139',
+        _189: '189',
+    }
+    const FRAME_TYPE = {
+        SEARCH_PAGE: 'SEARCH_PAGE',
+        TOPIC_PAGE: 'TOPIC_PAGE',
+    }
+    const RootComp = {
+        template: `
+        <header class="mint-header is-fixed" style="background: rgb(200, 200, 200); color: rgb(0, 0, 0); font-size: 14px;">
+            <div class="mint-searchbar">
+                <div class="mint-searchbar-inner">
+                    <i class="mintui mintui-search"></i>
+                    <input type="search" placeholder="" class="mint-searchbar-core" v-model="this._keyword">
+                </div>
+                <a class="mint-searchbar-cancel" style="display: none;"></a>
+            </div>
+            <button @click="onTap('139')" :class="{'button_selected': currentTap == '139'}">139</button>
+            <button @click="onTap('189')" :class="{'button_selected': currentTap == '189'}">189</button>
+        </header>
+        <div v-show="currentTap == '139'">
+            <topic-list type="139" :keyword="this.keyword"></topic-list>
+        </div>
+        <div v-show="currentTap == '189'">
+            <topic-list type="189" :keyword="this.keyword"></topic-list>
+        </div>
+        `,
+        props: {
+            keyword: String,
+        },
+        data() {
+            return {
+                currentTap: HOST_TYPE._139,
+                _keyword: '',
+                waitTimer: null,
+                scrollYMap: {},
+            }
+        },
+        mounted() {
+            this._keyword = this.keyword
+        },
+        methods: {
+            onTap(type) {
+                this.scrollYMap[this.currentTap] = window.scrollY;
+                this.currentTap = type;
+                setTimeout(() => {
+                    if (type in this.scrollYMap) {
+                        window.scrollTo(0, this.scrollYMap[type]);
+                    } else {
+                        window.scrollTo(0, 0);
+                    }
+                }, 20);
+            },
+        },
+        watch: {
+            _keyword(newValue, oldValue) {
+                console.log('on out keyword change', newValue, oldValue)
+                if (newValue == undefined) {
+                    return
+                }
+                if (this.waitTimer !== null) {
+                    clearTimeout(this.waitTimer);
+                }
+                this.waitTimer = setTimeout(async () => {
+                    try {
+                        await this.$router.push(`/search/${newValue}`)
+                        for (let k in this.scrollYMap) {
+                            this.scrollYMap[k] = 0;
+                        }
+                    } catch (error) {
+                        console.error(error)
+                    }
+                }, 500);
+            }
+        }
+    }
+    const TopicListComp = {
+        template: `
+        <div v-show="currentFrame == 'SEARCH_PAGE'" class="searchModule">
+            <div class="topicList">
+                <div class="item" v-for="item in listTopic" @click="onShowTopic(item.id)">
+                    <div>
+                        <div class="avatarBox"><img v-bind:src="this.getAvatarPath(item.nickname || item.account, item.avatarPath,item.avatarName)"></div>
+                        <div class="topInfo">
+                            <div class="top-box">
+                                <span class="userName">
+                                    {{ item.nickname || item.account }}
+                                </span>
+                            </div>
+                            <div class="bottom-box"><i class="time">{{ item.postTime }}</i></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="title">
+                            <span class="" v-html="item.title"></span> <span class="box"></span>
+                        </div>
+                        <div class="content"><span v-html="item.content"></span></div>
+                        <div class="detailInfo">
+                            <span class="bLeft">
+                                <div class="module">{{ item.tagName }}</div>
+                            </span>
+                            <p class="bRight"><i class="cms-commentCount " style="font-size: 12px;"></i><span
+                                    style="margin-left: 2px; margin-right: 5px;">评论：{{ item.commentTotal }}</span> <i class="cms-view "
+                                    style="font-size: 12px;"></i><span style="margin-left: 2px;">浏览：{{ item.viewTotal }}</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="topicPage page" style="">
+                    <a @click="search(this.keyword, this.currentpage-1)" :class="[this.currentpage == 1 ? 'no' : 'selected']">上一页</a>
+                    <span class="count">{{ this.currentpage }}/{{ this.totalpage }}</span>
+                    <a @click="search(this.keyword, this.currentpage+1)" :class="[this.currentpage >= this.totalpage ? 'no' : 'selected']">下一页</a>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="currentFrame == 'TOPIC_PAGE'">
+            <header class="mint-header is-fixed" style="background: rgb(250, 250, 250); color: rgb(0, 0, 0); font-size: 14px;">
+                <div class="mint-header-button is-left">
+                    <button @click="onBack()" class="mint-button mint-button--default mint-button--normal" style="font-size: 14px; padding-right: 8px;">
+                        <span class="mint-button-icon"><i class="mintui mintui-back"></i></span>
+                        <label class="mint-button-text">返回</label>
+                    </button>
+                </div>
+                <h1 class="mint-header-title">话题内容</h1>
+                <div class="mint-header-button is-right">
+                    <a href="/index" class=""><span class="cms-home" style="font-size: 24px; color: rgb(38, 162, 255);"></span></a>
+                </div>
+            </header>
+            <topic-content :type="this.type" :topicId="this.topicId"></topic-content>
+        </div>
+        `,
+        props: {
+            type: String,
+            keyword: String,
+        },
+        data() {
+            return {
+                currentpage: 0,
+                totalpage: 0,
+                listTopic: [],
+                currentFrame: FRAME_TYPE.SEARCH_PAGE,
+                topicId: 0,
+                scrollYSearchFrame: 0
+            }
+        },
+        async mounted() {
+            console.log('mounted')
+            await this.search(this.keyword)
+        },
+        methods: {
+            async search(keyword, page = 1) {
+                try {
+                    if (typeof (keyword) == "string" && keyword !== '') {
+                        let topic
+                        if (this.type == HOST_TYPE._139) {
+                            topic = await api.apiSearch_139(keyword, page)
+                        } else if (this.type == HOST_TYPE._189) {
+                            topic = await api.apiSearch_189(keyword, page)
+                        }
+
+                        if (!topic.success) {
+                            throw '搜索失败'
+                        }
+
+                        let searchResultPage = topic.searchResultPage;
+                        this.totalpage = parseInt(searchResultPage.totalpage)
+                        this.currentpage = searchResultPage.currentpage
+                        this.listTopic = searchResultPage.records
+                            .filter((v, i) => {
+                                return v.indexModule === 10
+                            })
+                            .map((v, i) => {
+                                return v.topic
+                            });
+                        window.scrollTo(0, 0)
+                    } else {
+                        let topic
+                        if (this.type == HOST_TYPE._139) {
+                            topic = await api.apiQueryTopicList_139(page)
+                        } else if (this.type == HOST_TYPE._189) {
+                            topic = await api.apiQueryTopicList_189(page)
+                        }
+                        if (typeof (topic.records) == "undefined") {
+                            throw "查询主页异常"
+                        }
+                        this.totalpage = parseInt(topic.totalpage)
+                        this.currentpage = topic.currentpage
+                        this.listTopic = topic.records
+                        window.scrollTo(0, 0)
+                    }
+                } catch (error) {
+                    console.error(error);
+                    notyf.error(error)
+                }
+            },
+            async onShowTopic(topicId) {
+                this.scrollYSearchFrame = window.scrollY;
+
+                this.topicId = topicId;
+                this.currentFrame = FRAME_TYPE.TOPIC_PAGE;
+            },
+            onBack() {
+                this.currentFrame = FRAME_TYPE.SEARCH_PAGE;
+
+                setTimeout(() => {
+                    window.scrollTo(0, this.scrollYSearchFrame);
+                }, 20);
+            },
+            getAvatarPath(nickname, apath, aname) {
+                if (aname) {
+                    return apath + aname;
+                } else {
+                    var width = 36
+                    return letterAvatar(nickname, width)
+                }
+            },
+        },
+
+        watch: {
+            async keyword(newValue, oldValue) {
+                console.log('on TopicListComp keyword changed', newValue, oldValue)
+                await this.search(newValue)
+            },
+        },
+    }
+
+    const TopicContentComp = {
+        template: `
+        <div class="topicContentModule">
+            <div class="head-box">
+                <div class="userInfo clearfix">
+                    <div class="avatarBox"><img
+                        v-bind:src="this.getAvatarPath(topic.nickname || topic.account, topic.avatarPath, topic.avatarName)"></div>
+                    <div class="left">
+                        <div class="topInfo">
+                            <div class="top-box">
+                                <span class="userName">
+                                    {{ topic.nickname || topic.account }}
+                                </span>
+                            </div>
+                            <div class="bottom-box">
+                                <i class="time">{{ topic.postTime }}</i>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="float: right; margin: 12px; font-size: 16px">
+                        <a :href="topic.originHost + '/thread?topicId=' + this.topicId" target="_blank">源站</a>
+                    </div>
+                </div>
+            </div>
+            <div class="topicDetail">
+                <div class="head">
+                    <div class="titleBox"><span class="title">{{ topic.title }}</span></div>
+                    <div class="info clearfix"><span class="left">
+                            <div class="tagName color1">{{ topic.tagName }}</div>
+                        </span>
+                        <p class="right">
+                            <span class="count-icon cms-commentCount"></span>评论：{{ topic.commentTotal }}
+                            <span class="view-icon cms-view"></span>浏览：{{ topic.viewTotal }}
+                        </p>
+                    </div>
+                </div>
+                <div class="main">
+                    <div v-html="topic.content" id="topicContent">
+                    </div>
+                </div>
+            </div>
+        </div>
+        `,
+        props: {
+            type: String,
+            topicId: String,
+        },
+        data() {
+            return {
+                topic: {},
+            }
+        },
+        async mounted() {
+            console.log('TopicContentComp mounted');
+            await this.onQueryTopicContent(this.type, this.topicId);
+        },
+        methods: {
+            async onQueryTopicContent(type, topicId) {
+                try {
+                    let ret
+                    if (type == HOST_TYPE._139) {
+                        ret = await api.apiQueryTopicContent_139(topicId);
+                    } else if (type == HOST_TYPE._189) {
+                        ret = await api.apiQueryTopicContent_189(topicId);
+                    } else {
+                        console.error('该type类型不支持', type)
+                        return
+                    }
+                    this.topic = ret;
+                    setTimeout(() => {
+                        this.setHideTagUI(this.topicId, this.topic.originHost);
+                    }, 20);
+                } catch (error) {
+                    console.error(error)
+                    notyf.error('打开话题失败')
+                }
+            },
+            async onAddComment(type, topicId, content) {
+                try {
+                    if (type == HOST_TYPE._189) {
+                        let ret = await api.apiAddComment_189(topicId, content);
+                        notyf.success('评论成功');
+                        await this.onQueryTopicContent(type, topicId);
+                    }
+                } catch (error) {
+                    console.error(error)
+                    notyf.error('评论失败')
+                }
+            },
+            getAvatarPath(nickname, apath, aname) {
+                if (aname) {
+                    return apath + aname;
+                } else {
+                    var width = 36
+                    return letterAvatar(nickname, width)
+                }
+            },
+            // 获取随机数
+            getRandom(m) {
+                //生成的随机数截取m位，生成的随机数最大不超过13位，能保证首位不为0
+                m = m > 13 ? 13 : m;
+                var num = Math.random().toString();
+                if (num.substr(num.length - m, 1) === '0') {
+                    return this.getRandom(m);
+                }
+                return num.substring(num.length - m);
+            },
+            //设置隐藏标签界面
+            setHideTagUI(topicId, originHost) {
+                //获取<hide>标签属性
+                var topicContent = document.getElementById("topicContent");
+                var hideElements = topicContent.getElementsByTagName("hide");
+                for (var i = 0; i < hideElements.length; i++) {
+                    var hideEle = hideElements[i];
+                    var random = this.getRandom(13);
+                    //等级名称
+                    var hideType = hideEle.getAttribute("hide-type");
+                    var inputValue = hideEle.getAttribute("input-value");
+                    if (hideType == '10') {
+                        var html = "";
+                        html += '<div class="hide-box">';
+                        html += '<div class="background-image cms-lock-solid-2"></div>';
+                        html += '<div class="background-prompt">此处内容已被隐藏，输入密码可见</div>';
+                        html += '<div class="input-box">';
+                        html += '<input type="password" id="hide_password_' + random + '" class="text" maxlength="30"  placeholder="密码" value="">';
+                        html += `<div style="text-align: center;"><a href="${originHost}/thread?topicId=${topicId}" target="_blank">打开源站</a></div>`
+                        html += '</div>';
+                        html += '</div>';
+                        hideEle.innerHTML = html;
+                    } else if (hideType == '20') {
+                        var html = "";
+                        html += '<div class="hide-box">';
+                        html += '<div class="background-image cms-lock-solid-2"></div>';
+                        html += '<div class="background-prompt">此处内容已被隐藏，评论话题可见</div>';
+                        html += '<div style="text-align: center;"><button id="btnAddComment" style="margin: 10px;">快速评论</button></div>'
+                        html += '</div>';
+                        hideEle.innerHTML = html;
+                        document.getElementById('btnAddComment').addEventListener('click', async (ev)=>{
+                            await this.onAddComment(this.type, this.topicId, '感谢分享');
+                        })
+                    } else if (hideType == '30') {
+                        var html = "";
+                        html += '<div class="hide-box">';
+                        html += '<div class="background-image cms-lock-solid-2"></div>';
+                        html += '<div class="background-prompt">此处内容已被隐藏，等级不够</div>';
+                        html += `<div style="text-align: center;"><a href="${originHost}/thread?topicId=${topicId}" target="_blank">打开源站</a></div>`
+                        html += '</div>';
+                        hideEle.innerHTML = html;
+                    } else if (hideType == '40') {
+                        var html = "";
+                        html += '<div class="hide-box">';
+                        html += '<div class="background-image cms-lock-solid-2"></div>';
+                        html += '<div class="background-prompt">此处内容已被隐藏，支付 ' + inputValue + ' 积分可见</div>';
+                        html += `<div style="text-align: center;"><a href="${originHost}/thread?topicId=${topicId}" target="_blank">打开源站</a></div>`
+                        hideEle.innerHTML = html;
+                    } else if (hideType == '50') {
+                        var html = "";
+                        html += '<div class="hide-box">';
+                        html += '<div class="background-image cms-lock-solid-2"></div>';
+                        html += '<div class="background-prompt">此处内容已被隐藏，支付￥<span class="highlight">' + inputValue + ' </span>元可见</div>';
+                        html += `<div style="text-align: center;"><a href="${originHost}/thread?topicId=${topicId}" target="_blank">打开源站</a></div>`
+                        hideEle.innerHTML = html;
+                    }
+                }
+
+            }
+        }
+
+    }
+    const routes = [
+        {
+            path: '/',
+            component: RootComp
+        },
+        {
+            path: '/search/:keyword?',
+            component: RootComp,
+            props: true,
+        },
+    ];
+    const router = VueRouter.createRouter({
+        history: VueRouter.createWebHashHistory(),
+        routes,
+    });
+    const app = Vue.createApp({
+        data() {
+            return {
+            }
+        },
+        created() {
+            // console.log('created');
+        },
+        mounted() {
+            // console.log('mounted');
+        },
+        activated() {
+            // console.log('activated');
+        },
+        computed: {
+
+        },
+        methods: {
+
+
+        }
+    })
+    app.use(router)
+    app.component('topic-list', TopicListComp)
+    app.component('topic-content', TopicContentComp)
+    app.mount('#app')
+</script>
+
+</html>
