@@ -8,7 +8,6 @@
     <title>Seracher</title>
 
     <script crossorigin="anonymous" src="./lib/vue.global.min.js"></script>
-    <script crossorigin="anonymous" src="./lib/vue-router.global.min.js"></script>
 
     <link crossorigin="anonymous" href="./lib/notyf.min.css" rel="stylesheet">
     <script crossorigin="anonymous" src="./lib/notyf.min.js"></script>
@@ -34,10 +33,6 @@
             background-color: #007bff;
         }
 
-        /* 鼠标悬停状态
-        .button_selected {
-            background-color: #b633af;
-        } */
         /* 按下状态 */
         button:active {
             background-color: #003080;
@@ -49,16 +44,44 @@
             cursor: not-allowed;
         }
 
+        .tagContainer {
+            margin: 5px;
+        }
+
+        .tagContainer>li:first-child {
+            border-radius: 0.3rem 0 0 0.3rem
+        }
+
+        .tagContainer>li:last-child {
+            border-radius: 0 0.3rem 0.3rem 0
+        }
+
         /* 选中状态 */
-        .button_selected {
-            background-color: #003080;
+        .tag_selected {
+            background-color: orangered;
+        }
+
+        .tag_normal {
+            background-color: rgb(134, 103, 44);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 1.2rem;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            /* border-radius: 5px; */
+            border: none;
+            color: #fff;
         }
     </style>
 </head>
 
 <body>
     <div id="app">
-        <router-view></router-view>
+        <root></root>
     </div>
 </body>
 <script>
@@ -259,16 +282,18 @@
     }
     const RootComp = {
         template: `
-        <header class="mint-header is-fixed" style="background: rgb(200, 200, 200); color: rgb(0, 0, 0); font-size: 14px;">
+        <header class="mint-header is-fixed" style="background: rgb(255, 255, 255); color: rgb(0, 0, 0); font-size: 14px;">
             <div class="mint-searchbar">
                 <div class="mint-searchbar-inner">
                     <i class="mintui mintui-search"></i>
-                    <input type="search" placeholder="" class="mint-searchbar-core" v-model="this._keyword">
+                    <input type="search" placeholder="" class="mint-searchbar-core" v-model="this.et_keyword">
                 </div>
                 <a class="mint-searchbar-cancel" style="display: none;"></a>
             </div>
-            <button @click="onTap('139')" :class="{'button_selected': currentTap == '139'}">139</button>
-            <button @click="onTap('189')" :class="{'button_selected': currentTap == '189'}">189</button>
+            <ul class="tagContainer">
+                <li @click="onTap('139')" class="tag" :class="[currentTap == '139' ? 'tag_selected' : 'tag_normal']" >139</li>
+                <li @click="onTap('189')" class="tag" :class="[currentTap == '189' ? 'tag_selected' : 'tag_normal']" >189</li>
+            </ul>
         </header>
         <div v-show="currentTap == '139'">
             <topic-list type="139" :keyword="this.keyword"></topic-list>
@@ -277,19 +302,16 @@
             <topic-list type="189" :keyword="this.keyword"></topic-list>
         </div>
         `,
-        props: {
-            keyword: String,
-        },
         data() {
             return {
                 currentTap: HOST_TYPE._139,
-                _keyword: '',
+                keyword: '',
+                et_keyword: '',
                 waitTimer: null,
                 scrollYMap: {},
             }
         },
         mounted() {
-            this._keyword = this.keyword
         },
         methods: {
             onTap(type) {
@@ -305,7 +327,7 @@
             },
         },
         watch: {
-            _keyword(newValue, oldValue) {
+            et_keyword(newValue, oldValue) {
                 console.log('on out keyword change', newValue, oldValue)
                 if (newValue == undefined) {
                     return
@@ -315,7 +337,7 @@
                 }
                 this.waitTimer = setTimeout(async () => {
                     try {
-                        await this.$router.push(`/search/${newValue}`)
+                        this.keyword = newValue
                         for (let k in this.scrollYMap) {
                             this.scrollYMap[k] = 0;
                         }
@@ -609,10 +631,10 @@
                         html += '<div class="hide-box">';
                         html += '<div class="background-image cms-lock-solid-2"></div>';
                         html += '<div class="background-prompt">此处内容已被隐藏，评论话题可见</div>';
-                        html += '<div style="text-align: center;"><button id="btnAddComment" style="margin: 10px;">快速评论</button></div>'
+                        html += `<div style="text-align: center;"><button id="btnAddComment_${random}" style="margin: 10px;">快速评论</button></div>`
                         html += '</div>';
                         hideEle.innerHTML = html;
-                        document.getElementById('btnAddComment').addEventListener('click', async (ev)=>{
+                        document.getElementById(`btnAddComment_${random}`).addEventListener('click', async (ev) => {
                             await this.onAddComment(this.type, this.topicId, '感谢分享');
                         })
                     } else if (hideType == '30') {
@@ -642,46 +664,11 @@
 
             }
         }
-
     }
-    const routes = [
-        {
-            path: '/',
-            component: RootComp
-        },
-        {
-            path: '/search/:keyword?',
-            component: RootComp,
-            props: true,
-        },
-    ];
-    const router = VueRouter.createRouter({
-        history: VueRouter.createWebHashHistory(),
-        routes,
-    });
     const app = Vue.createApp({
-        data() {
-            return {
-            }
-        },
-        created() {
-            // console.log('created');
-        },
-        mounted() {
-            // console.log('mounted');
-        },
-        activated() {
-            // console.log('activated');
-        },
-        computed: {
 
-        },
-        methods: {
-
-
-        }
     })
-    app.use(router)
+    app.component('root', RootComp)
     app.component('topic-list', TopicListComp)
     app.component('topic-content', TopicContentComp)
     app.mount('#app')
