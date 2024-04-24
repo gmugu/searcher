@@ -4,6 +4,7 @@ COPY rootfs /
 
 RUN set -evu; \
     pip install aiohttp; \
+    apk add --no-cache bash tzdata; \
     chmod +x /entrypoint.sh;
 
 WORKDIR /app/
