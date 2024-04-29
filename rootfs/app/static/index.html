@@ -14,6 +14,7 @@
 
     <link href="./lib/common.css" type="text/css" rel="stylesheet">
     <link href="./lib/style.css" type="text/css" rel="stylesheet">
+    <link href="./lib/17ee848ab493ecf3.css" type="text/css" rel="stylesheet">
     <style>
         button {
             display: inline-block;
@@ -148,6 +149,26 @@
         return dataURI
     }
     const api = {
+        async apiSearch_pansearch(keyword, limit = 10, offset = 0, pan = null) {
+            let response = await fetch(`/api/search_pansearch`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    keyword,
+                    limit,
+                    offset,
+                    pan,
+                })
+            });
+            let json = await response.json();
+            // console.log(json)
+            if (json.status !== 'success') {
+                throw json.msg;
+            }
+            return json.result
+        },
         async apiSearch_139(keyword, page = 1) {
             let response = await fetch(`/api/search_139`, {
                 method: 'POST',
@@ -275,6 +296,7 @@
     const HOST_TYPE = {
         _139: '139',
         _189: '189',
+        pansearch: 'pansearch',
     }
     const FRAME_TYPE = {
         SEARCH_PAGE: 'SEARCH_PAGE',
@@ -293,6 +315,7 @@
             <ul class="tagContainer">
                 <li @click="onTap('139')" class="tag" :class="[currentTap == '139' ? 'tag_selected' : 'tag_normal']" >139</li>
                 <li @click="onTap('189')" class="tag" :class="[currentTap == '189' ? 'tag_selected' : 'tag_normal']" >189</li>
+                <li @click="onTap('pansearch')" class="tag" :class="[currentTap == 'pansearch' ? 'tag_selected' : 'tag_normal']" >PS</li>
             </ul>
         </header>
         <div v-show="currentTap == '139'">
@@ -300,6 +323,9 @@
         </div>
         <div v-show="currentTap == '189'">
             <topic-list type="189" :keyword="this.keyword"></topic-list>
+        </div>
+        <div v-show="currentTap == 'pansearch'">
+            <pansearch-list :keyword="this.keyword"></pansearch-list>
         </div>
         `,
         data() {
@@ -348,6 +374,95 @@
             }
         }
     }
+    const PansearchListComp = {
+        template: `
+        <div class="flex min-h-screen flex-col" style="background-color: rgb(240 241 242)">
+            <main class="mx-auto flex flex-1 flex-col justify-center p-4">
+                <div class="grid grid-cols-1 gap-5" style="font-size: 16px; margin-top: 40px">
+                    <div v-for="item in listPansearce" class="flex flex-col items-start gap-5 rounded p-5 md:flex-row" style="background-color: #fff; color: #1f2937">
+                        <img :src="item.image || 'https://www.pansearch.me/favicon.png'" alt="image" class="w-full rounded object-cover md:w-60">
+                        <div class="flex flex-col gap-4">
+                            <div v-html="this.handleContent(item.content)" class="whitespace-pre-wrap break-all"></div>
+                            <p>资源发布时间：{{ this.timeFormat(item.time) }}</p>
+                        </div>
+                    </div>
+                    <div v-if="totalCount == -1">
+                        <h4>请输入关键字进行搜索</h4>
+                    </div>
+                    <div v-else-if="totalCount == 0">
+                        <h4>没有搜索到资源，请更换关键字</h4>
+                    </div>
+                    <div v-else class="topicPage page">
+                        <a @click="search(this.keyword, this.currentpage-1)" :class="[this.currentpage == 1 ? 'no' : 'selected']">上一页</a>
+                        <span class="count">{{ this.currentpage }}/{{ this.totalpage }}</span>
+                        <a @click="search(this.keyword, this.currentpage+1)" :class="[this.currentpage >= this.totalpage ? 'no' : 'selected']">下一页</a>
+                    </div>
+                </div>
+            </main>
+        </div>
+        `,
+        props: {
+            keyword: String,
+        },
+        data() {
+            return {
+                currentpage: 0,
+                totalpage: 0,
+                listPansearce: [],
+                scrollYSearchFrame: 0,
+                totalCount: -1,
+            }
+        },
+        async mounted() {
+            console.log('mounted')
+            await this.search(this.keyword)
+        },
+        methods: {
+            async search(keyword, page = 1) {
+                try {
+                    if (typeof (keyword) == "string" && keyword !== '') {
+                        let list = await api.apiSearch_pansearch(this.keyword, 10, 10 * (page - 1));
+                        if ('data' in list && Array.isArray(list.data) && 'total' in list) {
+                            this.listPansearce = list.data;
+                            this.currentpage = page;
+                            let total = parseInt(list.total);
+                            this.totalCount = total;
+                            if(total % 10 === 0){
+                                this.totalpage = Math.floor(total / 10);
+                            } else {
+                                this.totalpage = Math.floor(total / 10) + 1;
+                            }
+                            window.scrollTo(0, 0)
+                        } else {
+                            throw '搜索失败: pansearch'
+                        }
+                    }else{
+                        this.listPansearce = [];
+                        this.currentpage = 0;
+                        this.totalpage = 0;
+                        this.totalCount = -1;
+                        this.scrollYSearchFrame = 0;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    notyf.error(error)
+                }
+            },
+            handleContent(content) {
+                return content.replace(/\\n/g, '<br>');
+            },
+            timeFormat(time) {
+                let t = new Date(time);
+                return `${t.getFullYear()}-${t.getMonth() + 1}-${t.getDate()}`;
+            }
+        },
+        watch: {
+            async keyword(newValue, oldValue) {
+                console.log('on PansearchListComp keyword changed', newValue, oldValue)
+                await this.search(newValue)
+            },
+        },
+    }
     const TopicListComp = {
         template: `
         <div v-show="currentFrame == 'SEARCH_PAGE'" class="searchModule">
@@ -378,7 +493,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="topicPage page" style="">
+                <div class="topicPage page">
                     <a @click="search(this.keyword, this.currentpage-1)" :class="[this.currentpage == 1 ? 'no' : 'selected']">上一页</a>
                     <span class="count">{{ this.currentpage }}/{{ this.totalpage }}</span>
                     <a @click="search(this.keyword, this.currentpage+1)" :class="[this.currentpage >= this.totalpage ? 'no' : 'selected']">下一页</a>
@@ -669,6 +784,7 @@
 
     })
     app.component('root', RootComp)
+    app.component('pansearch-list', PansearchListComp)
     app.component('topic-list', TopicListComp)
     app.component('topic-content', TopicContentComp)
     app.mount('#app')

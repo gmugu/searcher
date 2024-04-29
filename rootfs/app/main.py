@@ -31,6 +31,25 @@ async def check_should_login():
         await login_189(ClientSessionSingleton().session_189, "mugu", "88888888")
 
 
+async def search_pansearch(keyword, limit=10, offset=0, pan=None):
+    url = f"https://www.pansearch.me/api/search?keyword={keyword}&limit={limit}&offset={offset}"
+    if pan != None:
+        url = f"https://www.pansearch.me/api/search?keyword={keyword}&limit={limit}&offset={offset}&pan={pan}"
+
+    headers = {
+        "Host": "www.pansearch.me",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "zh-CN,zh-Hans;q=0.9",
+        "Connection": "keep-alive",
+        "Accept-Encoding": "gzip, deflate, br",
+        "User-Agent": "PanSearch/2 CFNetwork/1494.0.7 Darwin/23.4.0",
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, headers=headers) as response:
+            return await response.json()
+
+
 async def search(session, host, keyword, page):
     # print("search", flush=True)
     if not keyword or keyword == "":
@@ -245,13 +264,26 @@ async def test():
 async def index(request):
     return web.FileResponse("./static/index.html")
 
-
+async def api_search_pansearch(request):
+    print("api_search_pansearch", flush=True)
+    try:
+        data = await request.json()
+        keyword = data["keyword"]
+        limit = data["limit"] if "limit" in data else 10
+        offset = data["offset"] if "offset" in data else 0
+        pan = data["pan"] if "pan" in data else None
+        ret = await search_pansearch(keyword, limit, offset, pan)
+        return web.json_response({"status": "success", "result": ret})
+    except Exception as e:
+        traceback.print_exc()
+        return web.json_response({"status": "fail", "msg": traceback.format_exc()})
+    
 async def api_search_139(request):
     print("api_search_139", flush=True)
     try:
         data = await request.json()
         keyword = data["keyword"]
-        page = data["page"] or 1
+        page = data["page"] if "page" in data else 1
         ret = await search_139(ClientSessionSingleton().session_139, keyword, page)
         return web.json_response({"status": "success", "result": ret})
     except Exception as e:
@@ -264,7 +296,7 @@ async def api_search_189(request):
     try:
         data = await request.json()
         keyword = data["keyword"]
-        page = data["page"] or 1
+        page = data["page"] if "page" in data else 1
         ret = await search_189(ClientSessionSingleton().session_189, keyword, page)
         return web.json_response({"status": "success", "result": ret})
     except Exception as e:
@@ -276,7 +308,7 @@ async def api_query_topic_list_139(request):
     print("api_query_topic_list_139", flush=True)
     try:
         data = await request.json()
-        page = data["page"] or 1
+        page = data["page"] if "page" in data else 1
         ret = await query_topic_list_139(ClientSessionSingleton().session_139, page)
         return web.json_response({"status": "success", "result": ret})
     except Exception as e:
@@ -288,7 +320,7 @@ async def api_query_topic_list_189(request):
     print("api_query_topic_list_189", flush=True)
     try:
         data = await request.json()
-        page = data["page"] or 1
+        page = data["page"] if "page" in data else 1
         ret = await query_topic_list_189(ClientSessionSingleton().session_189, page)
         return web.json_response({"status": "success", "result": ret})
     except Exception as e:
@@ -343,6 +375,7 @@ if __name__ == "__main__":
     app = web.Application()
     routes = [
         web.get("/", index),
+        web.post("/api/search_pansearch", api_search_pansearch),
         web.post("/api/search_139", api_search_139),
         web.post("/api/search_189", api_search_189),
         web.post("/api/queryTopicList_139", api_query_topic_list_139),
