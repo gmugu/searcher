@@ -14,7 +14,7 @@
 
     <link href="./lib/common.css" type="text/css" rel="stylesheet">
     <link href="./lib/style.css" type="text/css" rel="stylesheet">
-    <link href="./lib/17ee848ab493ecf3.css" type="text/css" rel="stylesheet">
+
     <style>
         button {
             display: inline-block;
@@ -76,6 +76,144 @@
             /* border-radius: 5px; */
             border: none;
             color: #fff;
+        }
+    </style>
+    <style>
+        .flex {
+            display: flex
+        }
+
+        .min-h-screen {
+            min-height: 100vh
+        }
+
+        .flex-col {
+            flex-direction: column
+        }
+
+        .mx-auto {
+            margin-left: auto;
+            margin-right: auto
+        }
+
+        .flex-1 {
+            flex: 1 1 0%
+        }
+
+        .justify-center {
+            justify-content: center
+        }
+
+        .p-4 {
+            padding: 1rem
+        }
+
+        .p-5 {
+            padding: 1.25rem
+        }
+
+        .grid {
+            display: grid
+        }
+
+        .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr))
+        }
+
+        .gap-4 {
+            gap: 1rem
+        }
+
+        .gap-5 {
+            gap: 1.25rem
+        }
+
+        .items-start {
+            align-items: flex-start
+        }
+
+        .rounded {
+            border-radius: .25rem
+        }
+
+        .flex-row {
+            flex-direction: row
+        }
+
+        .w-full {
+            width: 100%
+        }
+
+        .object-cover {
+            -o-object-fit: cover;
+            object-fit: cover
+        }
+
+        .whitespace-pre-wrap {
+            white-space: pre-wrap
+        }
+
+        .break-all {
+            word-break: break-all
+        }
+
+        @media (min-width: 768px) {
+            .md\:w-60 {
+                width: 15rem
+            }
+
+            .md\:flex-row {
+                flex-direction: row
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .lg\:mx-\[15\%\] {
+                margin-left: 15%;
+                margin-right: 15%
+            }
+
+            .lg\:my-5 {
+                margin-top: 1.25rem;
+                margin-bottom: 1.25rem
+            }
+
+            .lg\:grid-cols-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr))
+            }
+
+            .lg\:flex-row {
+                flex-direction: row
+            }
+
+            .lg\:px-\[20\%\] {
+                padding-left: 20%;
+                padding-right: 20%
+            }
+
+            .lg\:py-8 {
+                padding-top: 2rem;
+                padding-bottom: 2rem
+            }
+
+            .lg\:px-\[15\%\] {
+                padding-left: 15%;
+                padding-right: 15%
+            }
+
+            .lg\:pt-8 {
+                padding-top: 2rem
+            }
+
+            .lg\:text-sm {
+                font-size: .875rem;
+                line-height: 1.25rem
+            }
+
+            .lg\:text-6xl {
+                font-size: 3.75rem;
+                line-height: 1
+            }
         }
     </style>
 </head>
@@ -427,7 +565,7 @@
                             this.currentpage = page;
                             let total = parseInt(list.total);
                             this.totalCount = total;
-                            if(total % 10 === 0){
+                            if (total % 10 === 0) {
                                 this.totalpage = Math.floor(total / 10);
                             } else {
                                 this.totalpage = Math.floor(total / 10) + 1;
@@ -436,7 +574,7 @@
                         } else {
                             throw '搜索失败: pansearch'
                         }
-                    }else{
+                    } else {
                         this.listPansearce = [];
                         this.currentpage = 0;
                         this.totalpage = 0;
@@ -547,7 +685,7 @@
                         }
 
                         if (!topic.success) {
-                            throw '搜索失败'
+                            throw `搜索失败: ${this.type}`
                         }
 
                         let searchResultPage = topic.searchResultPage;
