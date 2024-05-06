@@ -804,6 +804,11 @@
         },
         async mounted() {
             console.log('TopicContentComp mounted');
+            if (this.type == HOST_TYPE._139) {
+                this.topic.originHost = 'http://www.91panta.cn';
+            } else if (this.type == HOST_TYPE._189) {
+                this.topic.originHost = 'http://www.leijing.xyz';
+            }
             await this.onQueryTopicContent(this.type, this.topicId);
         },
         methods: {

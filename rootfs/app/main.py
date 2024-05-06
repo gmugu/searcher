@@ -27,7 +27,7 @@ class ClientSessionSingleton:
 
 
 async def check_should_login():
-    if time.time() - G_LAST_LOGIN_TIME_189 > 7 * 24 * 60 * 60:
+    if time.time() - G_LAST_LOGIN_TIME_189 > 1 * 24 * 60 * 60:
         await login_189(ClientSessionSingleton().session_189, "mugu", "88888888")
 
 
@@ -41,7 +41,7 @@ async def search_pansearch(keyword, limit=10, offset=0, pan=None):
         "Accept": "application/json, text/plain, */*",
         "Accept-Language": "zh-CN,zh-Hans;q=0.9",
         "Connection": "keep-alive",
-        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Encoding": "gzip, deflate",
         "User-Agent": "PanSearch/2 CFNetwork/1494.0.7 Darwin/23.4.0",
     }
 
@@ -226,39 +226,6 @@ async def add_comment_189(session, topicId, content):
     print("add_comment_189", flush=True)
     await check_should_login()
     return await add_comment(session, URL_HOST["189"], topicId, content)
-
-
-async def test():
-    async with aiohttp.ClientSession() as session:
-        if not await login_189(session, "mugu", "88888888"):
-            print("login fail")
-            return
-
-        ret = await add_comment_189(session, 325, "感谢分享")
-        # ret = await queryTopicContent_189(322)
-        print(ret)
-
-    # searchRetJson = await search_189("幕府将军")
-    # if searchRetJson and searchRetJson["success"]:
-    #     searchResultPage = searchRetJson["searchResultPage"]
-    #     print(searchResultPage["maxresult"])  # 当前页下的总项数
-    #     print(searchResultPage["totalrecord"])  # 总项数
-    #     print(searchResultPage["totalpage"])  # 总页数
-    #     print(searchResultPage["currentpage"])  # 当前页
-
-    #     for item in searchResultPage["records"]:
-    #         topic = item["topic"]
-    #         print(topic["id"])
-    #         avatarPath = topic["avatarPath"]
-    #         avatarName = topic["avatarName"]
-    #         print(f"{avatarPath}{avatarName}")
-    #         print(topic["nickname"] or topic["account"])
-    #         print(topic["lastUpdateTime"] or topic["postTime"])
-    #         print(topic["title"])
-    #         print(topic["summary"])
-    #         print(topic["tagName"])
-    #         print(topic["commentTotal"])
-    #         print(topic["viewTotal"])
 
 
 async def index(request):
