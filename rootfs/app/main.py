@@ -7,12 +7,18 @@ import asyncio
 import time
 import hashlib
 import json
+from bs4 import BeautifulSoup
 
 PORT_NUMBER = 9094
 
 G_LAST_LOGIN_TIME_189 = 0
 
-URL_HOST = {"139": "http://www.91panta.cn", "189": "http://www.leijing.xyz"}
+URL_HOST = {
+    "139": "http://www.91panta.cn",
+    "189": "http://www.leijing.xyz",
+    "xiaoya": "https://xiaoya.zaob.in",
+    "pansearch": "https://www.pansearch.me",
+}
 
 
 class ClientSessionSingleton:
@@ -32,9 +38,9 @@ async def check_should_login():
 
 
 async def search_pansearch(keyword, limit=10, offset=0, pan=None):
-    url = f"https://www.pansearch.me/api/search?keyword={keyword}&limit={limit}&offset={offset}"
+    url = f"{URL_HOST['pansearch']}/api/search?keyword={keyword}&limit={limit}&offset={offset}"
     if pan != None:
-        url = f"https://www.pansearch.me/api/search?keyword={keyword}&limit={limit}&offset={offset}&pan={pan}"
+        url = url + "&pan={pan}"
 
     headers = {
         "Host": "www.pansearch.me",
@@ -48,6 +54,32 @@ async def search_pansearch(keyword, limit=10, offset=0, pan=None):
     async with aiohttp.ClientSession() as session:
         async with session.get(url, headers=headers) as response:
             return await response.json()
+
+
+async def search_xiaoya(keyword, type="all"):
+    url = f"{URL_HOST['xiaoya']}/search?box={keyword}&type={type}&url="
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            html = await response.text()
+            soup = BeautifulSoup(html, "html.parser")
+            body_divs = soup.body.find_all("div")
+            for div in body_divs:
+                ul = div.find("ul")
+                if ul:
+                    result_list = []
+                    for a in ul.find_all("a"):
+                        if "href" in a.attrs:
+                            result_list.append(
+                                {
+                                    "path": a.text,
+                                    "href": URL_HOST["xiaoya"] + a["href"],
+                                }
+                            )
+
+                    return {"result_list": result_list, "count": len(result_list)}
+
+            raise Exception("html文档解析失败")
 
 
 async def search(session, host, keyword, page):
@@ -231,6 +263,7 @@ async def add_comment_189(session, topicId, content):
 async def index(request):
     return web.FileResponse("./static/index.html")
 
+
 async def api_search_pansearch(request):
     print("api_search_pansearch", flush=True)
     try:
@@ -244,7 +277,21 @@ async def api_search_pansearch(request):
     except Exception as e:
         traceback.print_exc()
         return web.json_response({"status": "fail", "msg": traceback.format_exc()})
-    
+
+
+async def api_search_xiaoya(request):
+    print("api_search_xiaoya", flush=True)
+    try:
+        data = await request.json()
+        keyword = data["keyword"]
+        type = data["type"] if "type" in data else "all"
+        ret = await search_xiaoya(keyword, type)
+        return web.json_response({"status": "success", "result": ret})
+    except Exception as e:
+        traceback.print_exc()
+        return web.json_response({"status": "fail", "msg": traceback.format_exc()})
+
+
 async def api_search_139(request):
     print("api_search_139", flush=True)
     try:
@@ -343,6 +390,7 @@ if __name__ == "__main__":
     routes = [
         web.get("/", index),
         web.post("/api/search_pansearch", api_search_pansearch),
+        web.post("/api/search_xiaoya", api_search_xiaoya),
         web.post("/api/search_139", api_search_139),
         web.post("/api/search_189", api_search_189),
         web.post("/api/queryTopicList_139", api_query_topic_list_139),

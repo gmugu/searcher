@@ -307,6 +307,24 @@
             }
             return json.result
         },
+        async apiSearch_xiaoya(keyword, type = 'all') {
+            let response = await fetch(`/api/search_xiaoya`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    keyword,
+                    type,
+                })
+            });
+            let json = await response.json();
+            // console.log(json)
+            if (json.status !== 'success') {
+                throw json.msg;
+            }
+            return json.result
+        },
         async apiSearch_139(keyword, page = 1) {
             let response = await fetch(`/api/search_139`, {
                 method: 'POST',
@@ -453,6 +471,7 @@
             <ul class="tagContainer">
                 <li @click="onTap('139')" class="tag" :class="[currentTap == '139' ? 'tag_selected' : 'tag_normal']" >139</li>
                 <li @click="onTap('189')" class="tag" :class="[currentTap == '189' ? 'tag_selected' : 'tag_normal']" >189</li>
+                <li @click="onTap('xiaoya')" class="tag" :class="[currentTap == 'xiaoya' ? 'tag_selected' : 'tag_normal']" >XY</li>
                 <li @click="onTap('pansearch')" class="tag" :class="[currentTap == 'pansearch' ? 'tag_selected' : 'tag_normal']" >PS</li>
             </ul>
         </header>
@@ -461,6 +480,9 @@
         </div>
         <div v-show="currentTap == '189'">
             <topic-list type="189" :keyword="this.keyword"></topic-list>
+        </div>
+        <div v-show="currentTap == 'xiaoya'">
+            <xiaoya-list :keyword="this.keyword"></xiaoya-list>
         </div>
         <div v-show="currentTap == 'pansearch'">
             <pansearch-list :keyword="this.keyword"></pansearch-list>
@@ -511,6 +533,72 @@
                 }, 500);
             }
         }
+    }
+    const XiaoyaListComp = {
+        template: `
+        <div class="flex min-h-screen flex-col" style="background-color: rgb(240 241 242)">
+            <div v-if="totalCount >= 1" class="flex flex-col items-start gap-5 rounded p-5 md:flex-row" style="background-color: #fff; color: #1f2937; margin-top: 40px; font-size: 1rem;">
+                <ul>
+                    <div v-for="(item, index) in listXiaoya">
+                        <a :href='item.href' target="_blank">{{ (index+1) + '. ' + item.path }}</a>
+                        <br>
+                    </div>
+                </ul>
+            </div>
+            <main v-else class="mx-auto flex flex-1 flex-col justify-center p-4">
+                <div class="grid grid-cols-1 gap-5" style="font-size: 16px; margin-top: 40px">
+                    <div v-if="totalCount === -1">
+                        <h4>请输入关键字进行搜索</h4>
+                    </div>
+                    <div v-else-if="totalCount === 0">
+                        <h4>没有搜索到资源，请更换关键字</h4>
+                    </div>
+                </div>
+            </main>
+        </div>
+        `,
+        props: {
+            keyword: String,
+        },
+        data() {
+            return {
+                listXiaoya: [],
+                totalCount: -1,
+            }
+        },
+        async mounted() {
+            console.log('mounted')
+            await this.search(this.keyword)
+        },
+        methods: {
+            async search(keyword) {
+                try {
+                    if (typeof (keyword) == "string" && keyword !== '') {
+                        let list = await api.apiSearch_xiaoya(this.keyword);
+
+                        if ('result_list' in list && Array.isArray(list.result_list) && 'count' in list) {
+                            this.listXiaoya = list.result_list;
+                            this.totalCount = list.count;
+                            window.scrollTo(0, 0)
+                        } else {
+                            throw '搜索失败: xiaoya'
+                        }
+                    } else {
+                        this.listXiaoya = [];
+                        this.totalCount = -1;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    notyf.error(error)
+                }
+            },
+        },
+        watch: {
+            async keyword(newValue, oldValue) {
+                console.log('on PansearchListComp keyword changed', newValue, oldValue)
+                await this.search(newValue)
+            },
+        },
     }
     const PansearchListComp = {
         template: `
@@ -928,6 +1016,7 @@
     })
     app.component('root', RootComp)
     app.component('pansearch-list', PansearchListComp)
+    app.component('xiaoya-list', XiaoyaListComp)
     app.component('topic-list', TopicListComp)
     app.component('topic-content', TopicContentComp)
     app.mount('#app')
