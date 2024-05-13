@@ -8,6 +8,7 @@ import time
 import hashlib
 import json
 from bs4 import BeautifulSoup
+from urllib.parse import urlparse, parse_qs
 
 PORT_NUMBER = 9094
 
@@ -17,6 +18,7 @@ URL_HOST = {
     "139": "http://www.91panta.cn",
     "189": "http://www.leijing.xyz",
     "xiaoya": "https://xiaoya.zaob.in",
+    "zhaoziyuan": "https://zhaoziyuan1.cc",
     "pansearch": "https://www.pansearch.me",
 }
 
@@ -72,7 +74,7 @@ async def search_xiaoya(keyword, type="all"):
                         if "href" in a.attrs:
                             result_list.append(
                                 {
-                                    "path": a.text,
+                                    "title": a.text,
                                     "href": URL_HOST["xiaoya"] + a["href"],
                                 }
                             )
@@ -80,6 +82,74 @@ async def search_xiaoya(keyword, type="all"):
                     return {"result_list": result_list, "count": len(result_list)}
 
             raise Exception("html文档解析失败")
+
+
+async def search_zhaoziyuan(keyword, page=1):
+    url = f"{URL_HOST['zhaoziyuan']}/so?filename={keyword}&page={page}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            html = await response.text()
+            soup = BeautifulSoup(html, "html.parser")
+            try:
+                page = soup.body.select_one(".newsList > .page")
+                last_page_a = page.select_one("ul a:last-child")
+                purl = urlparse(last_page_a["href"])
+                totalpage = parse_qs(purl.query).get("page", [None])[0]
+
+                ul = soup.body.select_one(".newsList")
+                list_li = ul.select("li")
+
+                result_list = []
+                for li in list_li:
+                    div = li.select_one(".news_text")
+                    if div == None:
+                        continue
+                    a = li.select_one("a")
+                    h3 = li.select_one("h3")
+                    p = li.select_one("p")
+                    if a == None or h3 == None or p == None or "href" not in a.attrs:
+                        continue
+
+                    result_list.append(
+                        {
+                            "title": h3.text,
+                            "href": f'/api/parse_zhaoziyuan_resid?res_id={a["href"]}',
+                            "note": p.text,
+                        }
+                    )
+
+                return {
+                    "result_list": result_list,
+                    "count": len(result_list),
+                    "totalpage": totalpage,
+                }
+
+            except Exception as e:
+                traceback.print_exc()
+                raise Exception("html文档解析失败")
+
+
+async def parse_zhaoziyuan_resid(res_id):
+    url = f"{URL_HOST['zhaoziyuan']}/{res_id}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            html = await response.text()
+            soup = BeautifulSoup(html, "html.parser")
+            try:
+                aTags = soup.body.select(".news_box > a")
+                for a in aTags:
+                    if "href" in a.attrs:
+                        if (
+                            "https://www.alipan.com/" in a["href"]
+                            or "https://www.aliyundrive.com/"
+                        ):
+                            return a["href"]
+
+            except Exception as e:
+                traceback.print_exc()
+                raise Exception("html文档解析失败")
 
 
 async def search(session, host, keyword, page):
@@ -292,6 +362,33 @@ async def api_search_xiaoya(request):
         return web.json_response({"status": "fail", "msg": traceback.format_exc()})
 
 
+async def api_search_zhaoziyuan(request):
+    print("api_search_zhaoziyuan", flush=True)
+    try:
+        data = await request.json()
+        keyword = data["keyword"]
+        page = data["page"]
+        ret = await search_zhaoziyuan(keyword, page)
+
+        return web.json_response({"status": "success", "result": ret})
+    except Exception as e:
+        traceback.print_exc()
+        return web.json_response({"status": "fail", "msg": traceback.format_exc()})
+
+
+async def api_parse_zhaoziyuan_resid(request):
+    print("api_parse_zhaoziyuan_resid", flush=True)
+    res_id = request.query.get("res_id")
+    aliyundriveUrl = f'{URL_HOST["zhaoziyuan"]}/{res_id}'
+    try:
+        url = await parse_zhaoziyuan_resid(res_id)
+        if url != None:
+            aliyundriveUrl = url
+    except Exception as e:
+        traceback.print_exc()
+    return web.HTTPFound(aliyundriveUrl, text=f'<a href="{aliyundriveUrl}">Found</a>')
+
+
 async def api_search_139(request):
     print("api_search_139", flush=True)
     try:
@@ -391,6 +488,8 @@ if __name__ == "__main__":
         web.get("/", index),
         web.post("/api/search_pansearch", api_search_pansearch),
         web.post("/api/search_xiaoya", api_search_xiaoya),
+        web.post("/api/search_zhaoziyuan", api_search_zhaoziyuan),
+        web.get("/api/parse_zhaoziyuan_resid", api_parse_zhaoziyuan_resid),
         web.post("/api/search_139", api_search_139),
         web.post("/api/search_189", api_search_189),
         web.post("/api/queryTopicList_139", api_query_topic_list_139),
