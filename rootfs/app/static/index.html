@@ -46,16 +46,17 @@
         }
 
         .tagContainer {
-            margin: 5px;
+            margin: 0px;
+            height: 100%;
         }
 
-        .tagContainer>li:first-child {
+        /* .tagContainer>li:first-child {
             border-radius: 0.3rem 0 0 0.3rem
         }
 
         .tagContainer>li:last-child {
             border-radius: 0 0.3rem 0.3rem 0
-        }
+        } */
 
         /* 选中状态 */
         .tag_selected {
@@ -67,6 +68,8 @@
         }
 
         .tag {
+            flex: 1;
+            line-height: 2;
             display: inline-block;
             padding: 5px 10px;
             font-size: 1.2rem;
@@ -76,6 +79,33 @@
             /* border-radius: 5px; */
             border: none;
             color: #fff;
+        }
+
+        .mint-footer {
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+            align-items: center;
+            background-color: #fff;
+            box-sizing: border-box;
+            color: #000;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            font-size: 14px;
+            height: 45px;
+            line-height: 1;
+            /* padding: 8px; */
+            position: relative;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .mint-footer.is-fixed {
+            bottom: 0;
+            right: 0;
+            left: 0;
+            position: fixed;
+            z-index: 1;
         }
     </style>
     <style>
@@ -478,7 +508,7 @@
     }
     const RootComp = {
         template: `
-        <header class="mint-header is-fixed" style="background: rgb(255, 255, 255); color: rgb(0, 0, 0); font-size: 14px;">
+        <header class="mint-header is-fixed">
             <div class="mint-searchbar">
                 <div class="mint-searchbar-inner">
                     <i class="mintui mintui-search"></i>
@@ -486,13 +516,7 @@
                 </div>
                 <a class="mint-searchbar-cancel" style="display: none;"></a>
             </div>
-            <ul class="tagContainer">
-                <li @click="onTap('139')" class="tag" :class="[currentTap == '139' ? 'tag_selected' : 'tag_normal']" >139</li>
-                <li @click="onTap('189')" class="tag" :class="[currentTap == '189' ? 'tag_selected' : 'tag_normal']" >189</li>
-                <li @click="onTap('xiaoya')" class="tag" :class="[currentTap == 'xiaoya' ? 'tag_selected' : 'tag_normal']" >XY</li>
-                <li @click="onTap('zhaoziyuan')" class="tag" :class="[currentTap == 'zhaoziyuan' ? 'tag_selected' : 'tag_normal']" >ZZY</li>
-                <li @click="onTap('pansearch')" class="tag" :class="[currentTap == 'pansearch' ? 'tag_selected' : 'tag_normal']" >PS</li>
-            </ul>
+            
         </header>
         <div v-show="currentTap == '139'">
             <topic-list type="139" :keyword="this.keyword"></topic-list>
@@ -509,6 +533,16 @@
         <div v-show="currentTap == 'pansearch'">
             <pansearch-list :keyword="this.keyword"></pansearch-list>
         </div>
+
+        <footer class="mint-footer is-fixed">
+            <ul class="tagContainer flex" style="width:100%;">
+                <li @click="onTap('139')" class="tag" :class="[currentTap == '139' ? 'tag_selected' : 'tag_normal']" >139</li>
+                <li @click="onTap('189')" class="tag" :class="[currentTap == '189' ? 'tag_selected' : 'tag_normal']" >189</li>
+                <li @click="onTap('xiaoya')" class="tag" :class="[currentTap == 'xiaoya' ? 'tag_selected' : 'tag_normal']" >XY</li>
+                <li @click="onTap('zhaoziyuan')" class="tag" :class="[currentTap == 'zhaoziyuan' ? 'tag_selected' : 'tag_normal']" >ZZY</li>
+                <li @click="onTap('pansearch')" class="tag" :class="[currentTap == 'pansearch' ? 'tag_selected' : 'tag_normal']" >PS</li>
+            </ul>
+        </footer>
         `,
         data() {
             return {
@@ -559,7 +593,7 @@
     const XiaoyaListComp = {
         template: `
         <div class="flex min-h-screen flex-col" style="background-color: rgb(240 241 242)">
-            <div v-if="totalCount >= 1" class="flex flex-col items-start gap-5 rounded p-5 md:flex-row" style="background-color: #fff; color: #1f2937; margin-top: 40px;">
+            <div v-if="totalCount >= 1" class="flex flex-col items-start gap-5 rounded p-5 md:flex-row" style="background-color: #fff; color: #1f2937; margin-top: 40px; margin-bottom: 45px;">
                 <ul>
                     <div v-for="(item, index) in listXiaoya" style="padding-top: 0.5rem;padding-bottom: 0.5rem;">
                         <a :href='item.href' target="_blank" style="font-size: 1rem;">{{ (index+1) + '. ' + item.title }}</a>
@@ -568,7 +602,7 @@
                 </ul>
             </div>
             <main v-else class="mx-auto flex flex-1 flex-col justify-center p-4">
-                <div class="grid grid-cols-1 gap-5" style="font-size: 16px; margin-top: 40px">
+                <div class="grid grid-cols-1 gap-5" style="font-size: 16px;">
                     <div v-if="totalCount === -1">
                         <h4>请输入关键字进行搜索</h4>
                     </div>
@@ -625,7 +659,7 @@
     const ZhaoziyuanListComp = {
         template: `
         <div class="flex min-h-screen flex-col" style="background-color: rgb(240 241 242)">
-            <div v-if="currentPageCount >= 1" class="flex flex-col items-start gap-5 rounded p-5 md:flex-row" style="background-color: #fff; color: #1f2937; margin-top: 40px;">
+            <div v-if="currentPageCount >= 1" class="flex flex-col items-start gap-5 rounded p-5 md:flex-row" style="background-color: #fff; color: #1f2937; margin-top: 40px; margin-bottom: 45px;">
                 <ul>
                     <div v-for="(item, index) in listResult" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
                         <a :href='item.href' target="_blank" style="font-size: 1rem;">{{ item.title }}</a>
@@ -641,7 +675,7 @@
                 </div>
             </div>
             <main v-else class="mx-auto flex flex-1 flex-col justify-center p-4">
-                <div class="grid grid-cols-1 gap-5" style="font-size: 16px; margin-top: 40px">
+                <div class="grid grid-cols-1 gap-5" style="font-size: 16px;">
                     <div v-if="currentPageCount === -1">
                         <h4>请输入关键字进行搜索</h4>
                     </div>
@@ -703,7 +737,7 @@
         template: `
         <div class="flex min-h-screen flex-col" style="background-color: rgb(240 241 242)">
             <main class="mx-auto flex flex-1 flex-col justify-center p-4">
-                <div class="grid grid-cols-1 gap-5" style="font-size: 16px; margin-top: 40px">
+                <div v-if="totalCount >= 1" class="grid grid-cols-1 gap-5" style="font-size: 16px; margin-top: 40px; margin-bottom: 45px;">
                     <div v-for="item in listPansearce" class="flex flex-col items-start gap-5 rounded p-5 md:flex-row" style="background-color: #fff; color: #1f2937">
                         <img :src="item.image || 'https://www.pansearch.me/favicon.png'" alt="image" class="w-full rounded object-cover md:w-60">
                         <div class="flex flex-col gap-4">
@@ -711,16 +745,19 @@
                             <p>资源发布时间：{{ this.timeFormat(item.time) }}</p>
                         </div>
                     </div>
+                    
+                    <div class="topicPage page">
+                        <a @click="search(this.keyword, this.currentpage-1)" :class="[this.currentpage <= 1 ? 'no' : 'selected']">上一页</a>
+                        <span class="count">{{ this.currentpage }}/{{ this.totalpage }}</span>
+                        <a @click="search(this.keyword, this.currentpage+1)" :class="[this.currentpage >= this.totalpage ? 'no' : 'selected']">下一页</a>
+                    </div>
+                </div>
+                <div v-else class="grid grid-cols-1 gap-5" style="font-size: 16px;">
                     <div v-if="totalCount == -1">
                         <h4>请输入关键字进行搜索</h4>
                     </div>
                     <div v-else-if="totalCount == 0">
                         <h4>没有搜索到资源，请更换关键字</h4>
-                    </div>
-                    <div v-else class="topicPage page">
-                        <a @click="search(this.keyword, this.currentpage-1)" :class="[this.currentpage <= 1 ? 'no' : 'selected']">上一页</a>
-                        <span class="count">{{ this.currentpage }}/{{ this.totalpage }}</span>
-                        <a @click="search(this.keyword, this.currentpage+1)" :class="[this.currentpage >= this.totalpage ? 'no' : 'selected']">下一页</a>
                     </div>
                 </div>
             </main>
