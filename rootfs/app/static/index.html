@@ -81,6 +81,21 @@
             color: #fff;
         }
 
+        .bing-button {
+            height: 100%;
+            display: inline-block;
+            padding: 8px;
+            margin: 8px 0px 8px 8px;
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 0.3rem;
+            border: none;
+            cursor: pointer;
+        }
+
         .mint-footer {
             -webkit-box-align: center;
             -ms-flex-align: center;
@@ -516,7 +531,9 @@
                 </div>
                 <a class="mint-searchbar-cancel" style="display: none;"></a>
             </div>
-            
+            <div>
+                <button @click="searchByBing(this.keyword)" class="bing-button">Bing</button>
+            </div>
         </header>
         <div v-show="currentTap == '139'">
             <topic-list type="139" :keyword="this.keyword"></topic-list>
@@ -538,9 +555,9 @@
             <ul class="tagContainer flex" style="width:100%;">
                 <li @click="onTap('139')" class="tag" :class="[currentTap == '139' ? 'tag_selected' : 'tag_normal']" >139</li>
                 <li @click="onTap('189')" class="tag" :class="[currentTap == '189' ? 'tag_selected' : 'tag_normal']" >189</li>
-                <li @click="onTap('xiaoya')" class="tag" :class="[currentTap == 'xiaoya' ? 'tag_selected' : 'tag_normal']" >XY</li>
-                <li @click="onTap('zhaoziyuan')" class="tag" :class="[currentTap == 'zhaoziyuan' ? 'tag_selected' : 'tag_normal']" >ZZY</li>
-                <li @click="onTap('pansearch')" class="tag" :class="[currentTap == 'pansearch' ? 'tag_selected' : 'tag_normal']" >PS</li>
+                <li @click="onTap('xiaoya')" class="tag" :class="[currentTap == 'xiaoya' ? 'tag_selected' : 'tag_normal']" >小雅</li>
+                <li @click="onTap('zhaoziyuan')" class="tag" :class="[currentTap == 'zhaoziyuan' ? 'tag_selected' : 'tag_normal']" >找资源</li>
+                <li @click="onTap('pansearch')" class="tag" :class="[currentTap == 'pansearch' ? 'tag_selected' : 'tag_normal']" >盘搜</li>
             </ul>
         </footer>
         `,
@@ -556,6 +573,9 @@
         mounted() {
         },
         methods: {
+            searchByBing: (keyword) => {
+                this.window.open(`https://cn.bing.com/search?q=网盘|云盘+%2B${keyword}`, '_blank')
+            },
             onTap(type) {
                 this.scrollYMap[this.currentTap] = window.scrollY;
                 this.currentTap = type;
@@ -594,9 +614,9 @@
         template: `
         <div class="flex min-h-screen flex-col" style="background-color: rgb(240 241 242)">
             <div v-if="totalCount >= 1" class="flex flex-col items-start gap-5 rounded p-5 md:flex-row" style="background-color: #fff; color: #1f2937; margin-top: 40px; margin-bottom: 45px;">
-                <ul>
+                <ul style="width: 100%;">
                     <div v-for="(item, index) in listXiaoya" style="padding-top: 0.5rem;padding-bottom: 0.5rem;">
-                        <a :href='item.href' target="_blank" style="font-size: 1rem;">{{ (index+1) + '. ' + item.title }}</a>
+                        <a :href='item.href' target="_blank" style="font-size: 1rem; word-wrap: break-word;">{{ (index+1) + '. ' + item.title }}</a>
                         <br>
                     </div>
                 </ul>
@@ -659,10 +679,10 @@
     const ZhaoziyuanListComp = {
         template: `
         <div class="flex min-h-screen flex-col" style="background-color: rgb(240 241 242)">
-            <div v-if="currentPageCount >= 1" class="flex flex-col items-start gap-5 rounded p-5 md:flex-row" style="background-color: #fff; color: #1f2937; margin-top: 40px; margin-bottom: 45px;">
-                <ul>
+            <div v-if="currentPageCount >= 1" class="flex flex-col items-start gap-5 rounded p-5 md:flex-col" style="background-color: #fff; color: #1f2937; margin-top: 40px; margin-bottom: 45px;">
+                <ul style="width: 100%;">
                     <div v-for="(item, index) in listResult" style="padding-top: 0.5rem; padding-bottom: 0.5rem;">
-                        <a :href='item.href' target="_blank" style="font-size: 1rem;">{{ item.title }}</a>
+                        <a :href='item.href' target="_blank" style="font-size: 1rem; word-wrap: break-word;">{{ item.title }}</a>
                         <br>
                         <span style-size="font-size: 0.8rem;">{{ item.note }}</span>
                         <br>
