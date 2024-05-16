@@ -527,12 +527,15 @@
             <div class="mint-searchbar">
                 <div class="mint-searchbar-inner">
                     <i class="mintui mintui-search"></i>
-                    <input type="search" placeholder="" class="mint-searchbar-core" v-model="this.et_keyword">
+                    <form action="javascript:void" class="mint-searchbar-core">
+                        <input type="search" placeholder="" class="mint-searchbar-core" v-model="this.et_keyword" @keyup.enter="onPressEnterKey">
+                    </form>
                 </div>
                 <a class="mint-searchbar-cancel" style="display: none;"></a>
             </div>
             <div>
                 <button @click="searchByBing(this.keyword)" class="bing-button">Bing</button>
+                <button @click="searchByFreeOk(this.keyword)" class="bing-button">Free</button>
             </div>
         </header>
         <div v-show="currentTap == '139'">
@@ -573,8 +576,22 @@
         mounted() {
         },
         methods: {
+            onPressEnterKey() {
+                this.keyword = this.et_keyword;
+            },
             searchByBing: (keyword) => {
+                if(!keyword || keyword === ''){
+                    notyf.error('请输入查询关键字')
+                    return
+                }
                 this.window.open(`https://cn.bing.com/search?q=网盘|云盘+%2B${keyword}`, '_blank')
+            },
+            searchByFreeOk: (keyword) => {
+                if(!keyword || keyword === ''){
+                    notyf.error('请输入查询关键字')
+                    return
+                }
+                this.window.open(`https://www.freeok.pro/so1so/-------------.html?wd=${keyword}`, '_blank')
             },
             onTap(type) {
                 this.scrollYMap[this.currentTap] = window.scrollY;
@@ -588,27 +605,27 @@
                 }, 20);
             },
         },
-        watch: {
-            et_keyword(newValue, oldValue) {
-                console.log('on out keyword change', newValue, oldValue)
-                if (newValue == undefined) {
-                    return
-                }
-                if (this.waitTimer !== null) {
-                    clearTimeout(this.waitTimer);
-                }
-                this.waitTimer = setTimeout(async () => {
-                    try {
-                        this.keyword = newValue
-                        for (let k in this.scrollYMap) {
-                            this.scrollYMap[k] = 0;
-                        }
-                    } catch (error) {
-                        console.error(error)
-                    }
-                }, 500);
-            }
-        }
+        // watch: {
+        //     et_keyword(newValue, oldValue) {
+        //         console.log('on out keyword change', newValue, oldValue)
+        //         if (newValue == undefined) {
+        //             return
+        //         }
+        //         if (this.waitTimer !== null) {
+        //             clearTimeout(this.waitTimer);
+        //         }
+        //         this.waitTimer = setTimeout(async () => {
+        //             try {
+        //                 this.keyword = newValue
+        //                 for (let k in this.scrollYMap) {
+        //                     this.scrollYMap[k] = 0;
+        //                 }
+        //             } catch (error) {
+        //                 console.error(error)
+        //             }
+        //         }, 500);
+        //     }
+        // },
     }
     const XiaoyaListComp = {
         template: `
