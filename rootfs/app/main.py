@@ -171,8 +171,10 @@ async def search_139(session, keyword, page=1):
     if "success" in respJson and respJson["success"] == "true":
 
         def addHost(item):
-            ap = item["topic"]["avatarPath"]
-            item["topic"]["avatarPath"] = f'{URL_HOST["139"]}/{ap}'
+            for k in ["topic", "question"]:
+                if k in item and item[k] != None:
+                    ap = item[k]["avatarPath"]
+                    item[k]["avatarPath"] = f'{URL_HOST["139"]}/{ap}'
             return item
 
         respJson["searchResultPage"]["records"] = list(
