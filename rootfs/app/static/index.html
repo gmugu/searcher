@@ -9,8 +9,8 @@
 
     <script crossorigin="anonymous" src="./lib/vue.global.min.js"></script>
 
-    <link crossorigin="anonymous" href="./lib/notyf.min.css" rel="stylesheet">
-    <script crossorigin="anonymous" src="./lib/notyf.min.js"></script>
+    <!-- <link crossorigin="anonymous" href="./lib/notyf.min.css" rel="stylesheet">
+    <script crossorigin="anonymous" src="./lib/notyf.min.js"></script> -->
 
     <link href="./lib/common.css" type="text/css" rel="stylesheet">
     <link href="./lib/style.css" type="text/css" rel="stylesheet">
@@ -269,27 +269,41 @@
     </div>
 </body>
 <script>
+    function toast(text, disappearTime = 5000) {
+        const id = "searcher-gm-message-panel";
+        let p = document.querySelector(`#${id}`);
+        if (!p) {
+            p = document.createElement("div");
+            p.id = id;
+            p.style = `
+                position: fixed;
+                bottom: 55px;
+                right: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: end;
+                z-index: 999999999999999;
+            `;
+            (document.body || document.documentElement).appendChild(p);
+        }
+        let mdiv = document.createElement("div");
+        mdiv.innerText = text;
+        mdiv.style = `
+            padding: 3px 8px;
+            border-radius: 5px;
+            background: black;
+            box-shadow: #000 1px 2px 5px;
+            margin-top: 10px;
+            font-size: small;
+            color: #fff;
+            text-align: right;
+        `;
+        p.appendChild(mdiv);
+        setTimeout(() => {
+            p.removeChild(mdiv);
+        }, disappearTime);
+    }
 
-    const notyf = new Notyf({
-        position: { x: "center", y: "top" },
-        types: [
-            {
-                type: "success",
-                background: "#99c959",
-                duration: 2000,
-            },
-            {
-                type: "warning",
-                background: "#f8b26a",
-                duration: 3000
-            },
-            {
-                type: "error",
-                background: "#e15b64",
-                duration: 3000,
-            }
-        ]
-    });
     function letterAvatar(name, size, color) {
         name = name || ''
         size = size || 60
@@ -534,8 +548,8 @@
                 <a class="mint-searchbar-cancel" style="display: none;"></a>
             </div>
             <div>
-                <button @click="searchByBing(this.keyword)" class="bing-button">Bing</button>
-                <button @click="searchByFreeOk(this.keyword)" class="bing-button">Free</button>
+                <button @click="searchByBing(this.et_keyword)" class="bing-button">Bing</button>
+                <button @click="searchByFreeOk(this.et_keyword)" class="bing-button">Free</button>
             </div>
         </header>
         <div v-show="currentTap == '139'">
@@ -581,14 +595,14 @@
             },
             searchByBing: (keyword) => {
                 if(!keyword || keyword === ''){
-                    notyf.error('请输入查询关键字')
+                    toast('请输入查询关键字')
                     return
                 }
                 this.window.open(`https://cn.bing.com/search?q=网盘|云盘+%2B${keyword}`, '_blank')
             },
             searchByFreeOk: (keyword) => {
                 if(!keyword || keyword === ''){
-                    notyf.error('请输入查询关键字')
+                    toast('请输入查询关键字')
                     return
                 }
                 this.window.open(`https://www.freeok.pro/so1so/-------------.html?wd=${keyword}`, '_blank')
@@ -682,7 +696,7 @@
                     }
                 } catch (error) {
                     console.error(error);
-                    notyf.error(error)
+                    toast(error)
                 }
             },
         },
@@ -759,7 +773,7 @@
                     }
                 } catch (error) {
                     console.error(error);
-                    notyf.error(error)
+                    toast(error)
                 }
             },
         },
@@ -844,7 +858,7 @@
                     }
                 } catch (error) {
                     console.error(error);
-                    notyf.error(error)
+                    toast(error)
                 }
             },
             handleContent(content) {
@@ -977,7 +991,7 @@
                     }
                 } catch (error) {
                     console.error(error);
-                    notyf.error(error)
+                    toast(error)
                 }
             },
             async onShowTopic(topicId) {
@@ -1090,19 +1104,19 @@
                     }, 20);
                 } catch (error) {
                     console.error(error)
-                    notyf.error('打开话题失败')
+                    toast('打开话题失败')
                 }
             },
             async onAddComment(type, topicId, content) {
                 try {
                     if (type == HOST_TYPE._189) {
                         let ret = await api.apiAddComment_189(topicId, content);
-                        notyf.success('评论成功');
+                        toast('评论成功');
                         await this.onQueryTopicContent(type, topicId);
                     }
                 } catch (error) {
                     console.error(error)
-                    notyf.error('评论失败')
+                    toast('评论失败')
                 }
             },
             getAvatarPath(nickname, apath, aname) {
