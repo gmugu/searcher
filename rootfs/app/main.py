@@ -16,7 +16,7 @@ G_LAST_LOGIN_TIME_189 = 0
 
 URL_HOST = {
     "139": "http://www.91panta.cn",
-    "189": "http://www.leijing.xyz",
+    "189": "https://www.leijing.xyz",
     "xiaoya": "https://xiaoya.zaob.in",
     "zhaoziyuan": "https://zhaoziyuan1.cc",
     "pansearch": "https://www.pansearch.me",
@@ -160,6 +160,7 @@ async def search(session, host, keyword, page):
     url = f"{host}/search?keyword={keyword}&page={page}&_={int(time.time()*1000)}"
     headers = {
         "X-Requested-With": "XMLHttpRequest",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Mobile/15E148 Safari/604.1",
     }
     async with session.get(url, headers=headers) as resp:
         return await resp.json(content_type=None)
@@ -197,6 +198,7 @@ async def query_topic_list(session, host, page=1):
     url = f"{host}/queryTopicList?page={page}&_={int(time.time()*1000)}"
     headers = {
         "X-Requested-With": "XMLHttpRequest",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Mobile/15E148 Safari/604.1",
     }
     async with session.get(url, headers=headers) as resp:
         return await resp.json(content_type=None)
@@ -224,7 +226,10 @@ async def query_topic_list_189(session, page=1):
 async def query_topic_content(session, host, topicId):
     # print("query_topic_content", flush=True)
     url = f"{host}/queryTopicContent?topicId={topicId}&_={int(time.time()*1000)}"
-    async with session.get(url) as resp:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Mobile/15E148 Safari/604.1",
+    }
+    async with session.get(url, headers=headers) as resp:
         respJson = await resp.json(content_type=None)
         if respJson and isinstance(respJson, object):
             respJson["originHost"] = host
@@ -263,6 +268,7 @@ async def login(session, host, user, passwd):
     # print("login", flush=True)
     headers = {
         "X-Requested-With": "XMLHttpRequest",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Mobile/15E148 Safari/604.1",
     }
     url = f"{host}/login?_={int(time.time()*1000)}"
     async with session.get(url, headers=headers) as resp:
@@ -306,6 +312,7 @@ async def add_comment(session, host, topicId, content):
     # print("add_comment", flush=True)
     headers = {
         "X-Requested-With": "XMLHttpRequest",
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4.1 Mobile/15E148 Safari/604.1",
     }
 
     url = f"{host}/user/control/comment/add?_={int(time.time()*1000)}"
