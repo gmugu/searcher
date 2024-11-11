@@ -593,9 +593,9 @@
         <div v-show="currentTap == '189'">
             <topic-list type="189" :keyword="this.keyword"></topic-list>
         </div>
-        <div v-show="currentTap == 'zhaoziyuan'">
+        <!--div v-show="currentTap == 'zhaoziyuan'">
             <zhaoziyuan-list :keyword="this.keyword"></zhaoziyuan-list>
-        </div>
+        </div-->
         <div v-show="currentTap == 'kf'">
             <kuafu-list :keyword="this.keyword"></kuafu-list>
         </div>
@@ -611,7 +611,7 @@
                 <li @click="onTap('139')" class="tag" :class="[currentTap == '139' ? 'tag_selected' : 'tag_normal']" >139</li>
                 <li @click="onTap('189')" class="tag" :class="[currentTap == '189' ? 'tag_selected' : 'tag_normal']" >189</li>
                 <li @click="onTap('xiaoya')" class="tag" :class="[currentTap == 'xiaoya' ? 'tag_selected' : 'tag_normal']" >小雅</li>
-                <li @click="onTap('zhaoziyuan')" class="tag" :class="[currentTap == 'zhaoziyuan' ? 'tag_selected' : 'tag_normal']" >找资源</li>
+                <!--li @click="onTap('zhaoziyuan')" class="tag" :class="[currentTap == 'zhaoziyuan' ? 'tag_selected' : 'tag_normal']" >找资源</li-->
                 <li @click="onTap('kf')" class="tag" :class="[currentTap == 'kf' ? 'tag_selected' : 'tag_normal']" >夸父</li>
                 <li @click="onTap('pansearch')" class="tag" :class="[currentTap == 'pansearch' ? 'tag_selected' : 'tag_normal']" >盘搜</li>
             </ul>
@@ -1319,7 +1319,7 @@
     app.component('pansearch-list', PansearchListComp)
     app.component('xiaoya-list', XiaoyaListComp)
     app.component('kuafu-list', KuafuListComp)
-    app.component('zhaoziyuan-list', ZhaoziyuanListComp)
+    // app.component('zhaoziyuan-list', ZhaoziyuanListComp)
     app.component('topic-list', TopicListComp)
     app.component('topic-content', TopicContentComp)
     app.mount('#app')
