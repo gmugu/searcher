@@ -805,13 +805,13 @@
                 }
             },
             async onItemClick(item) {
-                const formData = new FormData()
-                formData.append('message', 'nice')
-                formData.append('doctype', '1')
-                formData.append('return_html', '1')
-                formData.append('quotepid', '0')
+                try {
+                    let res = await api.apiAddComment_kf(item.id, "nice")
+                } catch (error) {
+                    toast(error)
+                }
 
-                let res = await api.apiAddComment_kf(item.id, "nice")
+                this.window.open(item.href, '_blank')
             },
         },
         watch: {
