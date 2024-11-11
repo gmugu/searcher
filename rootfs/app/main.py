@@ -8,7 +8,7 @@ import time
 import hashlib
 import json
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, quote
 
 PORT_NUMBER = 9094
 
@@ -20,6 +20,7 @@ URL_HOST = {
     "xiaoya": "https://xiaoya.zaob.in",
     "zhaoziyuan": "https://zhaoziyuan1.cc",
     "pansearch": "https://www.pansearch.me",
+    "kf": "https://kuafuzys.com",
 }
 
 
@@ -31,6 +32,11 @@ class ClientSessionSingleton:
             cls._instance = super().__new__(cls)
             cls._instance.session_139 = aiohttp.ClientSession()
             cls._instance.session_189 = aiohttp.ClientSession()
+            cls._instance.session_kf = aiohttp.ClientSession()
+            cls._instance.session_kf.cookie_jar.update_cookies({
+                'bbs_sid': '710u7bhv6h5hpu5g38jm09h6et',
+                'bbs_token': 'rlxsdNkqVXPnAi2XwMMkPnSgR3dXVPxD_2BIhEvABzvWDNsh_2BaDJikL0r1CG7tTZHt6UiYz7N7Nt1rPTrih5IgSA_3D_3D',
+            })
         return cls._instance
 
 
@@ -83,6 +89,40 @@ async def search_xiaoya(keyword, type="all"):
 
             raise Exception("html文档解析失败")
 
+async def search_kf(keyword):
+    kwEncode = quote(keyword).replace('%', '_')
+    url = f"{URL_HOST['kf']}/search-{kwEncode}-1-0-1.htm"
+    async with ClientSessionSingleton().session_kf.get(url) as response:
+        html = await response.text()
+        soup = BeautifulSoup(html, "html.parser")
+
+        result_list = []
+        lis = soup.find_all('li', class_=["media", "thread", "tap"])
+        for li in lis:
+            ret = {}
+            ret['id'] = li['data-tid']
+            ret['href'] = f"{URL_HOST['kf']}/{li['data-href']}"
+            # ret['avatarPath'] = f"{URL_HOST['kf']}/{li.find('img')['src']}"
+            # ret['nickname'] = li.find('span', class_=["username", "text-muted", "mr-1", "hidden-sm"]).text.split('•')[0].strip()
+            
+            div = li.find('div', class_=["style3_subject", "break-all"])
+            ret['title'] = div.find('a').text
+            result_list.append(ret)
+        
+        return {"result_list": result_list, "count": len(result_list)}
+
+async def add_comment_kf(id, content):
+    data = {
+        'message': content,
+        'doctype': 1,
+        'return_html': 1,
+        'quotepid': 0,
+    }
+    url = f"{URL_HOST['kf']}/post-create-{id}-1.htm"
+    async with ClientSessionSingleton().session_kf.post(url, data=data) as response:
+        respTest = await response.text()
+        # print(respTest, flush=True)
+        return 'true'
 
 async def search_zhaoziyuan(keyword, page=1):
     url = f"{URL_HOST['zhaoziyuan']}/so?filename={keyword}&page={page}"
@@ -370,6 +410,28 @@ async def api_search_xiaoya(request):
         traceback.print_exc()
         return web.json_response({"status": "fail", "msg": traceback.format_exc()})
 
+async def api_search_kf(request):
+    print("api_search_kf", flush=True)
+    try:
+        data = await request.json()
+        keyword = data["keyword"]
+        ret = await search_kf(keyword)
+        return web.json_response({"status": "success", "result": ret})
+    except Exception as e:
+        traceback.print_exc()
+        return web.json_response({"status": "fail", "msg": traceback.format_exc()})
+    
+async def api_add_comment_kf(request):
+    print("api_add_comment_kf", flush=True)
+    try:
+        data = await request.json()
+        id = data["id"]
+        content = data["content"]
+        ret = await add_comment_kf(id, content)
+        return web.json_response({"status": "success", "result": ret})
+    except Exception as e:
+        traceback.print_exc()
+        return web.json_response({"status": "fail", "msg": traceback.format_exc()})
 
 async def api_search_zhaoziyuan(request):
     print("api_search_zhaoziyuan", flush=True)
@@ -501,6 +563,8 @@ if __name__ == "__main__":
         web.get("/api/parse_zhaoziyuan_resid", api_parse_zhaoziyuan_resid),
         web.post("/api/search_139", api_search_139),
         web.post("/api/search_189", api_search_189),
+        web.post("/api/search_kf", api_search_kf),
+        web.post("/api/addComment_kf", api_add_comment_kf),
         web.post("/api/queryTopicList_139", api_query_topic_list_139),
         web.post("/api/queryTopicList_189", api_query_topic_list_189),
         web.post("/api/queryTopicContent_139", api_query_topic_content_139),

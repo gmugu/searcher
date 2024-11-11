@@ -384,6 +384,23 @@
             }
             return json.result
         },
+        async apiSearch_kf(keyword) {
+            let response = await fetch(`/api/search_kf`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    keyword,
+                })
+            });
+            let json = await response.json();
+            // console.log(json)
+            if (json.status !== 'success') {
+                throw json.msg;
+            }
+            return json.result
+        },
         async apiSearch_zhaoziyuan(keyword, page) {
             let response = await fetch(`/api/search_zhaoziyuan`, {
                 method: 'POST',
@@ -524,6 +541,24 @@
             }
             return json.result;
         },
+        async apiAddComment_kf(id, content) {
+            let response = await fetch(`/api/addComment_kf`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id,
+                    content,
+                })
+            });
+            let json = await response.json();
+            // console.log(json)
+            if (json.status !== 'success') {
+                throw json.msg;
+            }
+            return json.result;
+        }
     }
 
     const HOST_TYPE = {
@@ -561,6 +596,9 @@
         <div v-show="currentTap == 'zhaoziyuan'">
             <zhaoziyuan-list :keyword="this.keyword"></zhaoziyuan-list>
         </div>
+        <div v-show="currentTap == 'kf'">
+            <kuafu-list :keyword="this.keyword"></kuafu-list>
+        </div>
         <div v-show="currentTap == 'xiaoya'">
             <xiaoya-list :keyword="this.keyword"></xiaoya-list>
         </div>
@@ -574,6 +612,7 @@
                 <li @click="onTap('189')" class="tag" :class="[currentTap == '189' ? 'tag_selected' : 'tag_normal']" >189</li>
                 <li @click="onTap('xiaoya')" class="tag" :class="[currentTap == 'xiaoya' ? 'tag_selected' : 'tag_normal']" >小雅</li>
                 <li @click="onTap('zhaoziyuan')" class="tag" :class="[currentTap == 'zhaoziyuan' ? 'tag_selected' : 'tag_normal']" >找资源</li>
+                <li @click="onTap('kf')" class="tag" :class="[currentTap == 'kf' ? 'tag_selected' : 'tag_normal']" >夸父</li>
                 <li @click="onTap('pansearch')" class="tag" :class="[currentTap == 'pansearch' ? 'tag_selected' : 'tag_normal']" >盘搜</li>
             </ul>
         </footer>
@@ -703,6 +742,81 @@
         watch: {
             async keyword(newValue, oldValue) {
                 console.log('on XiaoyaListComp keyword changed', newValue, oldValue)
+                await this.search(newValue)
+            },
+        },
+    }
+    const KuafuListComp = {
+        template: `
+        <div class="flex min-h-screen flex-col" style="background-color: rgb(240 241 242)">
+            <div v-if="totalCount >= 1" class="flex flex-col items-start gap-5 rounded p-5 md:flex-row" style="background-color: #fff; color: #1f2937; margin-top: 40px; margin-bottom: 45px;">
+                <ul style="width: 100%;">
+                    <div v-for="(item, index) in listKf" style="padding-top: 0.5rem;padding-bottom: 0.5rem;">
+                        <a :href='item.href' target="_blank" style="font-size: 1rem; word-wrap: break-word;" @click="onItemClick(item)">{{ (index+1) + '. ' + item.title }}</a>
+                        <br>
+                    </div>
+                </ul>
+            </div>
+            <main v-else class="mx-auto flex flex-1 flex-col justify-center p-4">
+                <div class="grid grid-cols-1 gap-5" style="font-size: 16px;">
+                    <div v-if="totalCount === -1">
+                        <h4>请输入关键字进行搜索</h4>
+                    </div>
+                    <div v-else-if="totalCount === 0">
+                        <h4>没有搜索到资源，请更换关键字</h4>
+                    </div>
+                </div>
+            </main>
+        </div>
+        `,
+        props: {
+            keyword: String,
+        },
+        data() {
+            return {
+                listKf: [],
+                totalCount: -1,
+            }
+        },
+        async mounted() {
+            console.log('mounted')
+            await this.search(this.keyword)
+        },
+        methods: {
+            async search(keyword) {
+                try {
+                    if (typeof (keyword) == "string" && keyword !== '') {
+                        let list = await api.apiSearch_kf(this.keyword);
+
+                        if ('result_list' in list && Array.isArray(list.result_list) && 'count' in list) {
+                            this.listKf = list.result_list;
+                            this.totalCount = list.count;
+                            window.scrollTo(0, 0)
+                        } else {
+                            throw '搜索失败: kuafa'
+                        }
+                    } else {
+                        this.listKf = [];
+                        this.totalCount = -1;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    toast(error)
+                }
+            },
+            async onItemClick(item) {
+                const formData = new FormData()
+                formData.append('message', 'nice')
+                formData.append('doctype', '1')
+                formData.append('return_html', '1')
+                formData.append('quotepid', '0')
+
+                let res = await api.apiAddComment_kf(item.id, "nice")
+            },
+        },
+        watch: {
+            async keyword(newValue, oldValue) {
+                console.log('on KwafuListComp keyword changed', newValue, oldValue)
                 await this.search(newValue)
             },
         },
@@ -1204,6 +1318,7 @@
     app.component('root', RootComp)
     app.component('pansearch-list', PansearchListComp)
     app.component('xiaoya-list', XiaoyaListComp)
+    app.component('kuafu-list', KuafuListComp)
     app.component('zhaoziyuan-list', ZhaoziyuanListComp)
     app.component('topic-list', TopicListComp)
     app.component('topic-content', TopicContentComp)
