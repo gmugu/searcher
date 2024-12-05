@@ -5,6 +5,7 @@ import aiohttp
 from aiohttp import web
 import asyncio
 import time
+import os
 import hashlib
 import json
 from bs4 import BeautifulSoup
@@ -23,6 +24,7 @@ URL_HOST = {
     "kf": "https://kuafuzys.com",
 }
 
+PROXY = os.getenv('https_proxy') or os.getenv('http_proxy')
 
 class ClientSessionSingleton:
     _instance = None
@@ -60,7 +62,7 @@ async def search_pansearch(keyword, limit=10, offset=0, pan=None):
     }
 
     async with aiohttp.ClientSession() as session:
-        async with session.get(url, headers=headers) as response:
+        async with session.get(url, headers=headers, proxy=PROXY) as response:
             return await response.json()
 
 
