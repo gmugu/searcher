@@ -585,6 +585,7 @@
             <div>
                 <button @click="searchByBing(this.et_keyword)" class="bing-button">Bing</button>
                 <!--button @click="searchByFreeOk(this.et_keyword)" class="bing-button">Free</button-->
+                <button @click="searchByTdnow(this.et_keyword)" class="bing-button">TdN</button>
             </div>
         </header>
         <div v-show="currentTap == '139'">
@@ -599,9 +600,9 @@
         <div v-show="currentTap == 'kf'">
             <kuafu-list :keyword="this.keyword"></kuafu-list>
         </div>
-        <div v-show="currentTap == 'xiaoya'">
+        <!--div v-show="currentTap == 'xiaoya'">
             <xiaoya-list :keyword="this.keyword"></xiaoya-list>
-        </div>
+        </div-->
         <div v-show="currentTap == 'pansearch'">
             <pansearch-list :keyword="this.keyword"></pansearch-list>
         </div>
@@ -610,7 +611,7 @@
             <ul class="tagContainer flex" style="width:100%;">
                 <li @click="onTap('139')" class="tag" :class="[currentTap == '139' ? 'tag_selected' : 'tag_normal']" >139</li>
                 <li @click="onTap('189')" class="tag" :class="[currentTap == '189' ? 'tag_selected' : 'tag_normal']" >189</li>
-                <li @click="onTap('xiaoya')" class="tag" :class="[currentTap == 'xiaoya' ? 'tag_selected' : 'tag_normal']" >小雅</li>
+                <!--li @click="onTap('xiaoya')" class="tag" :class="[currentTap == 'xiaoya' ? 'tag_selected' : 'tag_normal']" >小雅</li-->
                 <!--li @click="onTap('zhaoziyuan')" class="tag" :class="[currentTap == 'zhaoziyuan' ? 'tag_selected' : 'tag_normal']" >找资源</li-->
                 <li @click="onTap('kf')" class="tag" :class="[currentTap == 'kf' ? 'tag_selected' : 'tag_normal']" >夸父</li>
                 <li @click="onTap('pansearch')" class="tag" :class="[currentTap == 'pansearch' ? 'tag_selected' : 'tag_normal']" >盘搜</li>
@@ -645,6 +646,13 @@
                     return
                 }
                 this.window.open(`https://www.freeok.pro/so1so/-------------.html?wd=${keyword}`, '_blank')
+            },
+            searchByTdnow: (keyword) => {
+                if(!keyword || keyword === ''){
+                    toast('请输入查询关键字')
+                    return
+                }
+                this.window.open(`https://tdnow.life/vodsearch/-------------.html?wd=${keyword}`, '_blank')
             },
             onTap(type) {
                 this.scrollYMap[this.currentTap] = window.scrollY;
