@@ -94,7 +94,7 @@ async def search_xiaoya(keyword, type="all"):
 async def search_kf(keyword):
     kwEncode = quote(keyword).replace('%', '_')
     url = f"{URL_HOST['kf']}/search-{kwEncode}-1-0-1.htm"
-    async with ClientSessionSingleton().session_kf.get(url) as response:
+    async with ClientSessionSingleton().session_kf.get(url, proxy=PROXY) as response:
         html = await response.text()
         soup = BeautifulSoup(html, "html.parser")
 
@@ -121,7 +121,7 @@ async def add_comment_kf(id, content):
         'quotepid': 0,
     }
     url = f"{URL_HOST['kf']}/post-create-{id}-1.htm"
-    async with ClientSessionSingleton().session_kf.post(url, data=data) as response:
+    async with ClientSessionSingleton().session_kf.post(url, data=data, proxy=PROXY) as response:
         respTest = await response.text()
         # print(respTest, flush=True)
         return 'true'
