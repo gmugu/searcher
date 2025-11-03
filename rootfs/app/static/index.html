@@ -437,24 +437,24 @@
             }
             return json.result
         },
-        async apiSearch_189(keyword, page = 1) {
-            let response = await fetch(`/api/search_189`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    keyword,
-                    page,
-                })
-            });
-            let json = await response.json();
-            // console.log(json)
-            if (json.status !== 'success') {
-                throw json.msg;
-            }
-            return json.result
-        },
+        // async apiSearch_189(keyword, page = 1) {
+        //     let response = await fetch(`/api/search_189`, {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({
+        //             keyword,
+        //             page,
+        //         })
+        //     });
+        //     let json = await response.json();
+        //     // console.log(json)
+        //     if (json.status !== 'success') {
+        //         throw json.msg;
+        //     }
+        //     return json.result
+        // },
         async apiQueryTopicList_139(page = 1) {
             let response = await fetch(`/api/queryTopicList_139`, {
                 method: 'POST',
@@ -472,23 +472,23 @@
             }
             return json.result
         },
-        async apiQueryTopicList_189(page = 1) {
-            let response = await fetch(`/api/queryTopicList_189`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    page,
-                })
-            });
-            let json = await response.json();
-            // console.log(json)
-            if (json.status !== 'success') {
-                throw json.msg;
-            }
-            return json.result
-        },
+        // async apiQueryTopicList_189(page = 1) {
+        //     let response = await fetch(`/api/queryTopicList_189`, {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({
+        //             page,
+        //         })
+        //     });
+        //     let json = await response.json();
+        //     // console.log(json)
+        //     if (json.status !== 'success') {
+        //         throw json.msg;
+        //     }
+        //     return json.result
+        // },
         async apiQueryTopicContent_139(topicId) {
             let response = await fetch(`/api/queryTopicContent_139`, {
                 method: 'POST',
@@ -506,41 +506,41 @@
             }
             return json.result;
         },
-        async apiQueryTopicContent_189(topicId) {
-            let response = await fetch(`/api/queryTopicContent_189`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    topicId,
-                })
-            });
-            let json = await response.json();
-            // console.log(json)
-            if (json.status !== 'success') {
-                throw json.msg;
-            }
-            return json.result;
-        },
-        async apiAddComment_189(topicId, content) {
-            let response = await fetch(`/api/addComment_189`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    topicId,
-                    content,
-                })
-            });
-            let json = await response.json();
-            // console.log(json)
-            if (json.status !== 'success') {
-                throw json.msg;
-            }
-            return json.result;
-        },
+        // async apiQueryTopicContent_189(topicId) {
+        //     let response = await fetch(`/api/queryTopicContent_189`, {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({
+        //             topicId,
+        //         })
+        //     });
+        //     let json = await response.json();
+        //     // console.log(json)
+        //     if (json.status !== 'success') {
+        //         throw json.msg;
+        //     }
+        //     return json.result;
+        // },
+        // async apiAddComment_189(topicId, content) {
+        //     let response = await fetch(`/api/addComment_189`, {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({
+        //             topicId,
+        //             content,
+        //         })
+        //     });
+        //     let json = await response.json();
+        //     // console.log(json)
+        //     if (json.status !== 'success') {
+        //         throw json.msg;
+        //     }
+        //     return json.result;
+        // },
         async apiAddComment_kf(id, content) {
             let response = await fetch(`/api/addComment_kf`, {
                 method: 'POST',
@@ -563,7 +563,7 @@
 
     const HOST_TYPE = {
         _139: '139',
-        _189: '189',
+        // _189: '189',
         pansearch: 'pansearch',
     }
     const FRAME_TYPE = {
@@ -591,9 +591,9 @@
         <div v-show="currentTap == '139'">
             <topic-list type="139" :keyword="this.keyword"></topic-list>
         </div>
-        <div v-show="currentTap == '189'">
+        <!--div v-show="currentTap == '189'">
             <topic-list type="189" :keyword="this.keyword"></topic-list>
-        </div>
+        </div-->
         <!--div v-show="currentTap == 'zhaoziyuan'">
             <zhaoziyuan-list :keyword="this.keyword"></zhaoziyuan-list>
         </div-->
@@ -610,7 +610,7 @@
         <footer class="mint-footer is-fixed">
             <ul class="tagContainer flex" style="width:100%;">
                 <li @click="onTap('139')" class="tag" :class="[currentTap == '139' ? 'tag_selected' : 'tag_normal']" >139</li>
-                <li @click="onTap('189')" class="tag" :class="[currentTap == '189' ? 'tag_selected' : 'tag_normal']" >189</li>
+                <!--li @click="onTap('189')" class="tag" :class="[currentTap == '189' ? 'tag_selected' : 'tag_normal']" >189</li-->
                 <!--li @click="onTap('xiaoya')" class="tag" :class="[currentTap == 'xiaoya' ? 'tag_selected' : 'tag_normal']" >小雅</li-->
                 <!--li @click="onTap('zhaoziyuan')" class="tag" :class="[currentTap == 'zhaoziyuan' ? 'tag_selected' : 'tag_normal']" >找资源</li-->
                 <li @click="onTap('kf')" class="tag" :class="[currentTap == 'kf' ? 'tag_selected' : 'tag_normal']" >夸父</li>
@@ -1077,8 +1077,8 @@
                         let topic
                         if (this.type == HOST_TYPE._139) {
                             topic = await api.apiSearch_139(keyword, page)
-                        } else if (this.type == HOST_TYPE._189) {
-                            topic = await api.apiSearch_189(keyword, page)
+                        // } else if (this.type == HOST_TYPE._189) {
+                        //     topic = await api.apiSearch_189(keyword, page)
                         }
 
                         if (!topic.success) {
@@ -1100,8 +1100,8 @@
                         let topic
                         if (this.type == HOST_TYPE._139) {
                             topic = await api.apiQueryTopicList_139(page)
-                        } else if (this.type == HOST_TYPE._189) {
-                            topic = await api.apiQueryTopicList_189(page)
+                        // } else if (this.type == HOST_TYPE._189) {
+                        //     topic = await api.apiQueryTopicList_189(page)
                         }
                         if (typeof (topic.records) == "undefined") {
                             throw "查询主页异常"
@@ -1203,8 +1203,8 @@
             console.log('TopicContentComp mounted');
             if (this.type == HOST_TYPE._139) {
                 this.topic.originHost = 'http://www.91panta.cn';
-            } else if (this.type == HOST_TYPE._189) {
-                this.topic.originHost = 'http://www.leijing.xyz';
+            // } else if (this.type == HOST_TYPE._189) {
+            //     this.topic.originHost = 'http://www.leijing.xyz';
             }
             await this.onQueryTopicContent(this.type, this.topicId);
         },
@@ -1214,8 +1214,8 @@
                     let ret
                     if (type == HOST_TYPE._139) {
                         ret = await api.apiQueryTopicContent_139(topicId);
-                    } else if (type == HOST_TYPE._189) {
-                        ret = await api.apiQueryTopicContent_189(topicId);
+                    // } else if (type == HOST_TYPE._189) {
+                    //     ret = await api.apiQueryTopicContent_189(topicId);
                     } else {
                         console.error('该type类型不支持', type)
                         return
@@ -1229,18 +1229,18 @@
                     toast('打开话题失败')
                 }
             },
-            async onAddComment(type, topicId, content) {
-                try {
-                    if (type == HOST_TYPE._189) {
-                        let ret = await api.apiAddComment_189(topicId, content);
-                        toast('评论成功');
-                        await this.onQueryTopicContent(type, topicId);
-                    }
-                } catch (error) {
-                    console.error(error)
-                    toast('评论失败')
-                }
-            },
+            // async onAddComment(type, topicId, content) {
+            //     try {
+            //         if (type == HOST_TYPE._189) {
+            //             let ret = await api.apiAddComment_189(topicId, content);
+            //             toast('评论成功');
+            //             await this.onQueryTopicContent(type, topicId);
+            //         }
+            //     } catch (error) {
+            //         console.error(error)
+            //         toast('评论失败')
+            //     }
+            // },
             getAvatarPath(nickname, apath, aname) {
                 if (aname) {
                     return apath + aname;

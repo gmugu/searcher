@@ -21,7 +21,7 @@ URL_HOST = {
     "xiaoya": "https://xiaoya.zaob.in",
     "zhaoziyuan": "https://zhaoziyuan1.cc",
     "pansearch": "https://www.pansearch.me",
-    "kf": "https://kuafuzys.com",
+    "kf": "https://www.kuakeq.com",
 }
 
 PROXY = os.getenv('https_proxy') or os.getenv('http_proxy')
@@ -36,8 +36,8 @@ class ClientSessionSingleton:
             cls._instance.session_189 = aiohttp.ClientSession()
             cls._instance.session_kf = aiohttp.ClientSession()
             cls._instance.session_kf.cookie_jar.update_cookies({
-                'bbs_sid': '710u7bhv6h5hpu5g38jm09h6et',
-                'bbs_token': 'rlxsdNkqVXPnAi2XwMMkPnSgR3dXVPxD_2BIhEvABzvWDNsh_2BaDJikL0r1CG7tTZHt6UiYz7N7Nt1rPTrih5IgSA_3D_3D',
+                'bbs_sid': 'ukqripd71fl62oe2rsv2j47u13',
+                'bbs_token': 'O_2BYvvEbtstomySW5gLv7sD0_2F7ZY7rNcrBFxsPGlchXuiG_2Bsj',
             })
         return cls._instance
 
